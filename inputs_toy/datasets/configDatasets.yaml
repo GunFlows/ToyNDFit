@@ -1,0 +1,51 @@
+# ------------------------
+# Dataset definitions
+# ------------------------
+
+- name: "ND280"
+  isEnabled: true
+
+  showSelectedEventCount: true
+
+  selectedDataEntry: "data_toy"
+
+  devSingleThreadEventSelection: false
+
+  # invalidate duplicate entry needs to look at a continuous stream of events
+  devSingleThreadEventLoaderAndIndexer: true
+
+  mc:
+
+    # common tree name where the data are stored in each file
+    tree: "sample_sum"
+
+    # MC files
+    filePathList:
+      - "${INPUT_FOLDER}/toyDatasets/ND280/toy_MC_sample_sum.root"
+
+
+
+# NO weights for the moment
+    # base weight
+#    nominalWeightFormula:
+#      - "FluxWeight[0] * POTWeight * PileUpWeight"
+#      - "(DetNomWeight > 10) ? 10: (DetNomWeight < 0 ? 0 : DetNomWeight)"
+
+
+
+
+#  PROBABLY WE WON'T HAVE DATA IN TOY STUDY
+
+#  data:
+#
+#    - name: "data_toy"
+#      tree: "data_event_tree"
+#      filePathList:
+#        - "${OA_INPUT_FOLDER}/OA2021/ND280/event_summary_240222.root"
+#      overrideLeafDict: # originalVarName, otherLeafName[optionalArrayIndex]
+#        - { name: "Pmu",            expr: "RecoMuonMomentum" }
+#        - { name: "CosThetamu",     expr: "RecoMuonCosTheta" }
+#        - { name: "SelectedSample", expr: "SampleID" }
+#
+#    - name: "banffToyLoader"
+#      fromHistContent: "inputs/datasets/dataHistContent.yaml"

@@ -1,0 +1,59 @@
+# Sample Configuration
+
+dataEventType: Asimov # {}
+llhStatFunction: "BarlowLLH_BANFF_OA2021"
+#llhStatFunction: "BarlowLLH"
+#llhStatFunction: "PoissonLLH"
+
+llhConfig:
+  throwIfInfLlh: false
+  allowZeroMcWhenZeroData: true
+  usePoissonLikelihood: false
+  BBNoUpdateWeights: true
+
+fitSampleList:
+
+  ##########################
+  # FHC
+  ##########################
+
+  - name: "FHC #nu_{#mu} CC 0#pi 0p 0#gamma" # kFGD1NuMuCC0Pi0ProtonsNoPhoton or FGD1_numuCC_0pi_0_protons_no_photon (detector)
+    isEnabled: true
+    binning: "./inputs/samples/binning/FHC_numuCC_0pi_0_protons_no_photon.txt"
+    selectionCuts: "SelectedSample == 7" 
+    dataSets: [ "ND280" ]
+
+  - name: "FHC #nu_{#mu} CC 0#pi Np 0#gamma" # kFGD1NuMuCC0PiNProtonsNoPhoton or FGD1_numuCC_0pi_N_protons_no_photon
+    isEnabled: true
+    binning: "./inputs/samples/binning/FHC_numuCC_0pi_N_protons_no_photon.txt"
+    selectionCuts: "SelectedSample == 8" 
+    dataSets: [ "ND280" ]
+
+
+  ##########################
+  # RHC + NUMU BKG
+  ##########################
+
+  - name: "RHC Anti #nu_{#mu} CC 0#pi"
+    isEnabled: true
+    selectionCuts: "SelectedSample == 59" # FGD1 NuMuBkg CC0pi in AntiNu Mode kFGD1AntiNuMuCC0Pi
+    binning: "./inputs/samples/binning/RHC_anti-numuCC_0pi.txt"
+    dataSets: [ "ND280" ]
+
+  - name: "RHC Anti #nu_{#mu} CC 1#pi"
+    isEnabled: true
+    binning: "./inputs/samples/binning/RHC_anti-numuCC_1pi.txt"
+    selectionCuts: "SelectedSample == 60" # FGD1 NuMuBkg CC1pi in AntiNu Mode kFGD1AntiNuMuCC1Pi
+    dataSets: [ "ND280" ]
+
+
+#SampleId::SampleEnum::kFGD1NuMuCC0Pi0ProtonsNoPhoton -> 7
+#SampleId::SampleEnum::kFGD1NuMuCC0PiNProtonsNoPhoton -> 8
+#SampleId::SampleEnum::kFGD1NuMuCC1PiNoPhoton -> 10
+#SampleId::SampleEnum::kFGD1NuMuCCOtherNoPhoton -> 12
+#SampleId::SampleEnum::kFGD1NuMuCCPhoton -> 13
+#SampleId::SampleEnum::kFGD2NuMuCC0Pi0ProtonsNoPhoton -> 31
+#SampleId::SampleEnum::kFGD2NuMuCC0PiNProtonsNoPhoton -> 32
+#SampleId::SampleEnum::kFGD2NuMuCC1PiNoPhoton -> 34
+#SampleId::SampleEnum::kFGD2NuMuCCOtherNoPhoton -> 36
+#SampleId::SampleEnum::kFGD2NuMuCCPhoton -> 37
