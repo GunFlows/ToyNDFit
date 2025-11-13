@@ -98,8 +98,8 @@ if __name__ == "__main__":
         print("Usage: python read_nuisance_tree.py <path_to_nuisance_root_file> <is_FHC>")
         print("No file path provided, using default file.")
         # default files
-        # file_path = "/Users/lorenzo/T2K-uniGe/NDFit_Gunflows/ToyNDFit/DATA/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_NUISFLAT.root"
-        file_path = "/Users/lorenzo/T2K-uniGe/NDFit_Gunflows/ToyNDFit/DATA/T2KND_RHC_numubar_C8H8_NEUT580_1M_0000_NUISFLAT.root"
+        file_path = "/Users/lorenzo/T2K-uniGe/NDFit_Gunflows/ToyNDFit/DATA/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_NUISFLAT.root"
+        # file_path = "/Users/lorenzo/T2K-uniGe/NDFit_Gunflows/ToyNDFit/DATA/T2KND_RHC_numubar_C8H8_NEUT580_1M_0000_NUISFLAT.root"
 
     if isFHC is None:
         if "_FHC_" in file_path:
