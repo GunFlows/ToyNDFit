@@ -50,7 +50,7 @@ def plot_samples(SelectedSample_list, Pmu_list, CosThetamu_list, Reaction_list, 
             # nothing to plot for this sample
             continue
 
-        plt.hist(stacked_data, bins=50, stacked=True, alpha=0.8, label=labels, range=(0, 5000))
+        plt.hist(stacked_data, bins=50, stacked=True, alpha=0.8, label=labels, range=(0, 5))
         plt.xlabel('Pmu (GeV/c)')
         plt.ylabel('Number of Events')
         plt.title(f'{SampleCodes[sample_code]} ({sum(len(d) for d in stacked_data)} events)')
