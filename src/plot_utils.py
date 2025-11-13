@@ -44,13 +44,13 @@ def plot_samples(SelectedSample_list, Pmu_list, CosThetamu_list, Reaction_list, 
             if len(pmus_for_r) > 0:
                 stacked_data.append(pmus_for_r)
                 reaction_dict = neut_group(r)
-                labels.append(f"{reaction_dict['interaction_type']}, {reaction_dict['subcategory']}")
+                labels.append(f"{neut_compact[r]}")
 
         if len(stacked_data) == 0:
             # nothing to plot for this sample
             continue
 
-        plt.hist(stacked_data, bins=50, stacked=True, alpha=0.8, label=labels)
+        plt.hist(stacked_data, bins=50, stacked=True, alpha=0.8, label=labels, range=(0, 5000))
         plt.xlabel('Pmu (GeV/c)')
         plt.ylabel('Number of Events')
         plt.title(f'{SampleCodes[sample_code]} ({sum(len(d) for d in stacked_data)} events)')
@@ -65,13 +65,13 @@ def plot_samples(SelectedSample_list, Pmu_list, CosThetamu_list, Reaction_list, 
             if len(cthetas_for_r) > 0:
                 stacked_data_ctheta.append(cthetas_for_r)
                 reaction_dict = neut_group(r)
-                labels_ctheta.append(f"{reaction_dict['interaction_type']}, {reaction_dict['subcategory']}")
+                labels_ctheta.append(f"{neut_compact[r]}")
 
         if len(stacked_data_ctheta) == 0:
             # nothing to plot for this sample
             continue
 
-        plt.hist(stacked_data_ctheta, bins=50, stacked=True, alpha=0.8, label=labels_ctheta)
+        plt.hist(stacked_data_ctheta, bins=50, stacked=True, alpha=0.8, label=labels_ctheta, range=(-1, 1))
         plt.xlabel('CosThetamu')
         plt.ylabel('Number of Events')
         plt.title(f'{SampleCodes[sample_code]} ({sum(len(d) for d in stacked_data_ctheta)} events)')
