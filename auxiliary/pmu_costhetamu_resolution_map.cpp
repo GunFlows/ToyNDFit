@@ -33,7 +33,7 @@ void pmu_costhetamu_resolution_map(const char * filename = "run9wMCsplines.root"
   tree->SetBranchAddress("TrueCosThetamu", &TrueCosThetamu);
 
   vector<double> pmu_bins = {0,300,400,800,1500,5000,30000};
-  vector<double> costhetamu_bins = {-1,0.7,0.8,0.9,0.95,0.99,1};
+  vector<double> costhetamu_bins = {-1,0.7,0.8,0.9,0.92,0.94,0.96,0.98,1};
 
   map<pair<double,double>, TH1F*> pmu_resolution_hist_map;
   map<pair<double,double>, TH1F*> costhetamu_resolution_hist_map;
@@ -156,8 +156,8 @@ void pmu_costhetamu_resolution_map(const char * filename = "run9wMCsplines.root"
   pmu_resolution_map->SetTitle("P_{#mu} Resolution Map");
   c1->SetLogz();
   pmu_resolution_map->SetName("pmu_resolution_map");
-  pmu_resolution_map->SaveAs("pmu_resolution_map.root");
-  c1->SaveAs("pmu_resolution_map.png");
+  pmu_resolution_map->SaveAs("../reso_maps/pmu_resolution_map.root");
+  c1->SaveAs("../reso_maps/pmu_resolution_map.png");
   TCanvas *c2 = new TCanvas("c2", "Costhetamu Resolution Map", 800, 600);
   costhetamu_resolution_map->Draw("COLZ");
   costhetamu_resolution_map->SetStats(0);
@@ -167,8 +167,8 @@ void pmu_costhetamu_resolution_map(const char * filename = "run9wMCsplines.root"
   c2->SetLogz();
   costhetamu_resolution_map->SetTitle("Cos#theta_{#mu} Resolution Map");
   costhetamu_resolution_map->SetName("costhetamu_resolution_map");
-  costhetamu_resolution_map->SaveAs("costhetamu_resolution_map.root");
-  c2->SaveAs("costhetamu_resolution_map.png");
+  costhetamu_resolution_map->SaveAs("../reso_maps/costhetamu_resolution_map.root");
+  c2->SaveAs("../reso_maps/costhetamu_resolution_map.png");
 
 
 }
