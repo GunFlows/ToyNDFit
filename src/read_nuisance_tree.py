@@ -16,6 +16,30 @@ from src.nuisance_event import NUISANCEEvent, NUISANCEFile, SampleCodes
 # Minimal version: produce only branches "SelectedSample", "Pmu", "CosThetamu".
 
 
+def smear(Pmu, CosThetamu):
+    """
+    Smear the muon momentum with a Gaussian resolution.
+
+    Parameters
+    ----------
+    Pmu : float
+        True muon momentum (GeV/c).
+    CosThetamu : float
+        True muon cosine of the angle.
+
+    Returns
+    -------
+    Pmu_smeared : float
+        Smeared muon momentum (GeV/c).
+    CosThetamu_smeared : float
+        Smeared muon cosine of the angle.
+    """
+
+
+
+
+
+
 
 def read_nuisance_tree(file_path, isFHC = True, max_events = -1, tree_name="FlatTree_VARS"):
     """
@@ -48,28 +72,18 @@ def read_nuisance_tree(file_path, isFHC = True, max_events = -1, tree_name="Flat
             break
         if (i + 1) % (num_entries // 1000) == 0:
             pbar.update(1)
-        # if (i + 1) % 20000 == 0:
-        #     print(f"Read {i + 1}/{num_entries} entries...")
+
+        sample = event.PerformSelection(isFHC)
         Pmu = event.Pmu()
         CosThetamu = event.CosThetamu()
 
-        sample = event.PerformSelection(isFHC)
+        Pmu_smeared = smear_momentum(Pmu)
+        CosThetamu_smeared = smear_angle(CosThetamu)
+
         SelectedSample_list.append(sample)
         Pmu_list.append(Pmu)
         CosThetamu_list.append(CosThetamu)
         Reaction_list.append(event.Mode)
-        # print(f"Event {i + 1}: SelectedSample = {sample}: {SampleCodes[sample]}\tPmu = {Pmu} GeV/c")
-        # if Pmu is not None:
-        #     print(f"Pmu = {event.Pmu()} GeV/c")
-        # else:
-        #     print("No muon found in this event.")
-
-        # if sample == -1:
-        #     vector_pmu = event.vectorPmu()
-        #     if vector_pmu is not None:
-        #         print(f"Event {i + 1}: No sample selected. {event.Mode}, {event.cc}, {event.PDGnu}, Pmu={Pmu:.3f}, CosThetamu={CosThetamu:.3f} Px={vector_pmu[0]}, Py={vector_pmu[1]}, Pz={vector_pmu[2]}")
-        #     else:
-        #         print(f"Event {i + 1}: No sample selected. {event.Mode}, {event.cc}, {event.PDGnu}, no muon here. ")
 
     pbar.close()
 
