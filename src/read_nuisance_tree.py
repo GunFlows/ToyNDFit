@@ -43,7 +43,10 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
     SelectedSample_list = []
     Pmu_list = []
     CosThetamu_list = []
+    TruePmu_list = []
+    TrueCosThetamu_list = []
     Reaction_list = []
+    Enu_list = []
 
     pbar = tqdm(total=100)
     for i, event in enumerate(f):
@@ -59,6 +62,7 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         # compute kinematics and variables
         Pmu = event.Pmu()
         CosThetamu = event.CosThetamu()
+        Enu = event.Enu_true
         # smear Pmu, CosThetamu
         Pmu_smeared, CosThetamu_smeared = smear(Pmu, CosThetamu, pmu_map, cthetamap)
 
@@ -66,7 +70,10 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         SelectedSample_list.append(sample)
         Pmu_list.append(Pmu_smeared)
         CosThetamu_list.append(CosThetamu_smeared)
+        TruePmu_list.append(Pmu)
+        TrueCosThetamu_list.append(CosThetamu)
         Reaction_list.append(event.Mode)
+        Enu_list.append(Enu)
 
     pbar.close()
 
@@ -79,7 +86,10 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         "SelectedSample": to_1d_numpy(SelectedSample_list, dtype=np.int32, int_fill=-1),
         "Pmu": to_1d_numpy(Pmu_list, dtype=np.float32, float_fill=-999.0),
         "CosThetamu": to_1d_numpy(CosThetamu_list, dtype=np.float32, float_fill=-999.0),
+        "TruePmu": to_1d_numpy(TruePmu_list, dtype=np.float32, float_fill=-999.0),
+        "TrueCosThetamu": to_1d_numpy(TrueCosThetamu_list, dtype=np.float32, float_fill=-999.0),
         "Reaction": to_1d_numpy(Reaction_list, dtype=np.int32, int_fill=-999),
+        "Enu": to_1d_numpy(Enu_list, dtype=np.float32, float_fill=-999.0),
     }
 
 
@@ -113,11 +123,11 @@ if __name__ == "__main__":
 
     data = make_dataset_from_nuisance(file_path, isFHC, max_events=-1)
 
+    # create plots (unpack lists from dictionary)
     SelectedSample_list = data["SelectedSample"]
     Pmu_list = data["Pmu"]
     CosThetamu_list = data["CosThetamu"]
     Reaction_list = data["Reaction"]
-
     plot_utils.plot_samples(SelectedSample_list, Pmu_list, CosThetamu_list, Reaction_list, out_dir=out_dir)
 
     # finally, create a root file with a TTree containing the smeared kinematics and SelectedSample branch
