@@ -1,0 +1,59 @@
+# Sample Configuration
+
+dataEventType: Asimov # {}
+llhStatFunction: "BarlowLLH_BANFF_OA2021"
+#llhStatFunction: "BarlowLLH"
+#llhStatFunction: "PoissonLLH"
+
+llhConfig:
+  throwIfInfLlh: false
+  allowZeroMcWhenZeroData: true
+  usePoissonLikelihood: false
+  BBNoUpdateWeights: true
+
+fitSampleList:
+
+  ##########################
+  # FHC
+  ##########################
+
+  - name: "FHC FGD1 #nu_{#mu} CC 0#pi"
+    isEnabled: true
+    binning: "./inputs/samples/binning/FGD1_numuCC_0pi_0_protons_no_photon.txt"
+    selectionCuts: "SelectedSample == 1"
+    dataSets: [ "ND280" ]
+
+  - name: "FHC FGD1 #nu_{#mu} CC 1#pi"
+    isEnabled: true
+    binning: "./inputs/samples/binning/FGD1_numuCC_1pi_no_photon.txt"
+    selectionCuts: "SelectedSample == 2"
+    dataSets: [ "ND280" ]
+
+  - name: "FHC FGD1 #nu_{#mu} CC Other"
+    isEnabled: true
+    binning: "./inputs/samples/binning/FGD1_numuCC_other_no_photon.txt"
+    selectionCuts: "SelectedSample == 3"
+    dataSets: [ "ND280" ]
+
+  ##########################
+  # RHC + NUMU BKG
+  ##########################
+
+  - name: "RHC FGD1 Anti #nu_{#mu} CC 0#pi"
+    isEnabled: true
+    selectionCuts: "SelectedSample == 59" # FGD1 NuMuBkg CC0pi in AntiNu Mode kFGD1AntiNuMuCC0Pi
+    binning: "./inputs/samples/binning/FGD1_anti-numuCC_0pi.txt"
+    dataSets: [ "ND280" ]
+
+  - name: "RHC FGD1 Anti #nu_{#mu} CC 1#pi"
+    isEnabled: true
+    binning: "./inputs/samples/binning/FGD1_anti-numuCC_1pi.txt"
+    selectionCuts: "SelectedSample == 60" # FGD1 NuMuBkg CC1pi in AntiNu Mode kFGD1AntiNuMuCC1Pi
+    dataSets: [ "ND280" ]
+
+  - name: "RHC FGD1 Anti #nu_{#mu} CC Other"
+    isEnabled: true
+    binning: "./inputs/samples/binning/FGD1_anti-numuCC_other.txt"
+    selectionCuts: "SelectedSample == 61" # FGD1 NuMuBkg CCother in AntiNu Mode kFGD1AntiNuMuCCOther
+    dataSets: [ "ND280" ]
+

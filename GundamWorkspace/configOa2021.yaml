@@ -22,9 +22,9 @@ fitterEngineConfig:
 #  pcaThreshold: 5E-3
 
 
-  # Apply gain on the determination of the step size for the fitter
-  #  scaleParStepWithChi2Response: true # default :false. use 1 sigma instead
-  #  parStepGain: 0.1
+#   Apply gain on the determination of the step size for the fitter
+#    scaleParStepWithChi2Response: true # default :false. use 1 sigma instead
+#    parStepGain: 0.1
 
   # Throw (correlated) parameters before making the fit
   # This helps Minuit converge while doing an Asimov fit when too many fit parameters are involved

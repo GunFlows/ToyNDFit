@@ -1,0 +1,31 @@
+# ------------------------
+# Dataset definitions
+# ------------------------
+
+- name: "ND280"
+  isEnabled: true
+
+  showSelectedEventCount: true
+
+  selectedDataEntry: "dataToy" # default
+
+#  devSingleThreadEventSelection: false
+
+#  devSingleThreadEventLoaderAndIndexer: true
+
+  mc:
+    # common tree name where the data are stored in each file
+    tree: "sample_sum"
+    # MC files
+    filePathList:
+      - "${TOYND_DATA}/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_GUNDAMINPUT.root"
+      - "${TOYND_DATA}/T2KND_RHC_numubar_C8H8_NEUT580_1M_0000_GUNDAMINPUT.root"
+
+
+  data:
+    - name: "dataToy"
+      tree: "sample_sum"
+      # Data files (same as MC here)
+      filePathList:
+        - "${TOYND_DATA}/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_GUNDAMINPUT.root"
+        - "${TOYND_DATA}/T2KND_RHC_numubar_C8H8_NEUT580_1M_0000_GUNDAMINPUT.root"
