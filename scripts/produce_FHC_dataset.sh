@@ -8,8 +8,10 @@ fi
 
 executable=${SOURCE_FOLDER}/produce_dataset_from_NUISANCE.py
 
-input_nuisance_file="/Users/lorenzo/T2K-uniGe/NDFit_Gunflows/ToyNDFit/DATA/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_NUISFLAT.root"
+input_nuisance_file="${DATASET_FOLDER}/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_NUISFLAT.root"
 
-python ${executable} ${input_nuisance_file} 1
+python ${executable} \
+      --file_path ${input_nuisance_file} \
+      --isFHC 1
 
 

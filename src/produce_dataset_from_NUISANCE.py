@@ -1,6 +1,7 @@
 
 from utils import *
 import plot_utils
+import argparse
 
 # Function to read the NUISANCE flat trees, smear the momenta based on a realistic momentum and angle resolution, and
 # generates a "GUNDAM dataset": basically a root file with a TTree containing FS kinematics.
@@ -106,18 +107,17 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
 
 if __name__ == "__main__":
 
-    isFHC = None
-    out_dir = "./plots"
-    if len(sys.argv) > 1:
-        file_path = sys.argv[1]
-        if len(sys.argv) > 2:
-            isFHC = bool(int(sys.argv[2]))
-    else:
-        print("Usage: python read_nuisance_tree.py <path_to_nuisance_root_file> <is_FHC>")
-        print("No file path provided, using default file.")
-        # default files
-        file_path = "/Users/lorenzo/T2K-uniGe/NDFit_Gunflows/ToyNDFit/DATA/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_NUISFLAT.root"
-        # file_path = "/Users/lorenzo/T2K-uniGe/NDFit_Gunflows/ToyNDFit/DATA/T2KND_RHC_numubar_C8H8_NEUT580_1M_0000_NUISFLAT.root"
+    p = argparse.ArgumentParser(description="Produce a GUNDAM input dataset from a NUISANCE flat tree.")
+    p.add_argument("--file_path", "-f", type=str, help="Path to the NUISANCE flat tree ROOT file.")
+    p.add_argument("--isFHC", type=int, nargs="?", default=None, help="1 if FHC beam mode, 0 if RHC. If not provided, inferred from file name.")
+    p.add_argument("--max_events", type=int, default=-1, help="Maximum number of events to process. Default is -1 (all events).")
+    p.add_argument("--output_plots_dir", type=str, default="./plots", help="Directory to save output plots. Default is ./plots")
+    args = p.parse_args()
+
+    isFHC = args.isFHC
+    file_path = args.file_path
+    max_events = args.max_events
+    out_dir = args.output_plots_dir
 
     if isFHC is None:
         if "_FHC_" in file_path:
@@ -127,9 +127,9 @@ if __name__ == "__main__":
         else:
             raise ValueError("Cannot determine beam mode (FHC or RHC) from file path.")
 
-    print(f"Processing file: {file_path},\nisFHC={isFHC}")
+    print(f"Processing file: {file_path},\nisFHC={isFHC},\nmax_events={max_events},\nPlots will be saved to: {out_dir}")
 
-    data = make_dataset_from_nuisance(file_path, isFHC, max_events=-1)
+    data = make_dataset_from_nuisance(file_path, isFHC, max_events=max_events)
 
     # create plots (unpack lists from dictionary)
     SelectedSample_list = data["SelectedSample"]
