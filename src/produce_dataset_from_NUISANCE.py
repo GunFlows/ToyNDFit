@@ -32,8 +32,12 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
     """
 
     # open pmu and costhetamu resolution maps
-    pmu_map = uproot.open("reso_maps/pmu_resolution_map.root")["pmu_resolution_map"]
-    cthetamap = uproot.open("reso_maps/costhetamu_resolution_map.root")["costhetamu_resolution_map"]
+    reso_maps_folder = os.environ.get("RESO_MAPS_FOLDER")
+    if not reso_maps_folder:
+        raise EnvironmentError("Can't find resolution maps because environment variable `RESO_MAPS_FOLDER` is not set. Did you forget to run setup.sh?")
+
+    pmu_map   = uproot.open(os.path.join(reso_maps_folder, "pmu_resolution_map.root"))["pmu_resolution_map"]
+    cthetamap = uproot.open(os.path.join(reso_maps_folder, "costhetamu_resolution_map.root"))["costhetamu_resolution_map"]
 
     start_time = datetime.datetime.now()
     f = NUISANCEFile(file_path, tree_name, relevant_keys=None, step=10000)
@@ -82,6 +86,9 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
     elapsed_time = end_time - start_time
     print(f"Finished reading {num_entries} entries in {elapsed_time}.")
 
+    # dummy weights branch (all weights = 1.0)
+    weights_list = [1.0] * len(SelectedSample_list)
+
     dictionary = {
         "SelectedSample": to_1d_numpy(SelectedSample_list, dtype=np.int32, int_fill=-1),
         "Pmu": to_1d_numpy(Pmu_list, dtype=np.float32, float_fill=-999.0),
@@ -90,6 +97,7 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         "TrueCosThetamu": to_1d_numpy(TrueCosThetamu_list, dtype=np.float32, float_fill=-999.0),
         "Reaction": to_1d_numpy(Reaction_list, dtype=np.int32, int_fill=-999),
         "Enu": to_1d_numpy(Enu_list, dtype=np.float32, float_fill=-999.0),
+        "weight": to_1d_numpy(weights_list, dtype=np.float32, float_fill=1.0),
     }
 
 
@@ -130,7 +138,7 @@ if __name__ == "__main__":
     Reaction_list = data["Reaction"]
     plot_utils.plot_samples(SelectedSample_list, Pmu_list, CosThetamu_list, Reaction_list, out_dir=out_dir)
 
-    # finally, create a root file with a TTree containing the smeared kinematics and SelectedSample branch
+    # finally, create a root file with a TTree containing all the information in the dictionary
     output_root_file = file_path.replace("_NUISFLAT.root", "_GUNDAMINPUT.root")
     with uproot.recreate(output_root_file) as f_out:
         f_out.mktree("sample_sum",data)

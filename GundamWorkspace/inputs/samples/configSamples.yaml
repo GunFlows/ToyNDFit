@@ -57,3 +57,6 @@ fitSampleList:
     selectionCuts: "SelectedSample == 61" # FGD1 NuMuBkg CCother in AntiNu Mode kFGD1AntiNuMuCCOther
     dataSets: [ "ND280" ]
 
+
+# ONCE NEW SAMPLES ARE INCLUDED IN THE INPUT DATASET FILES, OR A MORE COMPLEX SELECTION IS
+# IMPLEMENTED, NEW SAMPLES CAN BE ADDED HERE
