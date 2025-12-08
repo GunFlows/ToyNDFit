@@ -50,8 +50,8 @@ tolerance: 1E-2 # -> used in BANFF
 #    tolerance: 0.1 # for debug
 #    tolerance: 0.1 # for debug
 strategy: 1 # used also in BANFF
-max_iter: 100000
-max_fcn: 1E9
+maxIterations: 100000
+maxFcnCalls: 1E9
 
 # useNormalizedFitSpace: when true, every parameter is rescaled such as the
 # prior mean value is set to 0 and the prior sigma is set to 1. This option

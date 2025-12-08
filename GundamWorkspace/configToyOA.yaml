@@ -8,8 +8,6 @@ minGundamVersion: 1.8.0
 
 fitterEngineConfig:
 
-  # If the stat chi2 don't move over this value, the parameter will be fixed
-  pcaDeltaChi2Threshold: 1
 
   # 1.9.1+ feature
   pcaMethod: DeltaChi2Threshold
@@ -34,9 +32,6 @@ fitterEngineConfig:
   # ThrowPar = ParPrior +  throwMcBeforeFitGain * randomGaus(0, 1sigma)
   throwMcBeforeFitGain: 0.1
 
-  # false by default
-  restoreStepSizeBeforeHesse: false
-
   # Generate figures of the samples prefit/postfit using plotGeneratorConfig
   generateSamplePlots: true
 
@@ -47,29 +42,25 @@ fitterEngineConfig:
   enableParamVariations: false
   paramVariationsSigmas: [ -3, -1, 0, 1, 3 ]
 
-  engineType: minimizer
   minimizerConfig: "./inputs/fitter/configMinimizer.yaml"
 
-  # debug options
-  debugPrintLoadedEvents: false
-  debugPrintLoadedEventsNbPerSample: 10
+  likelihoodInterfaceConfig:
+    propagatorConfig:
 
-  propagatorConfig:
+      showEventBreakdown: true # default: true
+      showEventBreakdownBeforePrior: true # default: false
+      throwParameters: false
 
-    showEventBreakdown: true # default: true
-    showEventBreakdownBeforePrior: true # default: false
-    throwParameters: false
+      # For the p-Values / pull studies
+      reThrowParSetIfOutOfBounds: true
 
-    # For the p-Values / pull studies
-    reThrowParSetIfOutOfBounds: true
+      # debug options
+      debugPrintLoadedEvents: true
+      debugPrintLoadedEventsNbPerSample: 10
+      devSingleThreadReweight: false
+      devSingleThreadHistFill: false
 
-    # debug options
-    debugPrintLoadedEvents: true
-    debugPrintLoadedEventsNbPerSample: 10
-    devSingleThreadReweight: false
-    devSingleThreadHistFill: false
-
-    parameterSetListConfig: "./inputs/parameters/configParSet.yaml"
-    dataSetList:            "./inputs/datasets/configDatasets.yaml"
-    fitSampleSetConfig:     "./inputs/samples/configSamples.yaml"
+      parameterSetListConfig: "./inputs/parameters/configParSet.yaml"
+      dataSetList:            "./inputs/datasets/configDatasets.yaml"
+      fitSampleSetConfig:     "./inputs/samples/configSamples.yaml"
 

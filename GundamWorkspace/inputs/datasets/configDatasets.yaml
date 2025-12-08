@@ -9,10 +9,6 @@
 
   selectedDataEntry: "dataToy" # default
 
-#  devSingleThreadEventSelection: false
-
-#  devSingleThreadEventLoaderAndIndexer: true
-
   mc:
     # common tree name where the data are stored in each file
     tree: "sample_sum"

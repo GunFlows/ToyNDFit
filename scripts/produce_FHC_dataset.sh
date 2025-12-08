@@ -9,9 +9,10 @@ fi
 executable=${SOURCE_FOLDER}/produce_dataset_from_NUISANCE.py
 
 input_nuisance_file="${DATASET_FOLDER}/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_NUISFLAT.root"
+output_plots_dir=${DATASET_FOLDER}/plots_FHC
+mkdir -p ${output_plots_dir}
 
 python ${executable} \
       --file_path ${input_nuisance_file} \
-      --isFHC 1
-
-
+      --isFHC 1 \
+      --output_plots_dir ${output_plots_dir}
