@@ -11,8 +11,8 @@
 
   # Allow fit parameters to be thrown before fit (default: true)
   # Parameters Definition
-  covarianceMatrixFilePath: "./inputs/parameters/flux/21bv2_run1to10_ndto9_banff.root"
-  covarianceMatrixTMatrixD: "total_flux_cov"
+  covarianceMatrixFilePath: "./inputs/parameters/linear/prior_matrix.root"
+  covarianceMatrixTMatrixD: "prior_covariance_matrix"
   eigenParBounds:
     minValue: -30
     maxValue: 30
@@ -21,7 +21,7 @@
   dialSetDefinitions:
     - applyOnDataSets: ["*"]
       propagateResponseOn: [ "weight" ] # TODO: implement
-      parametersBinningPath: "./inputs/parameters/simpleEnuBins.txt"
+      parametersBinningPath: "./inputs/parameters/linear/simpleEnuBins.txt"
       printDialsSummary: true
   printDialSetsSummary: true
 

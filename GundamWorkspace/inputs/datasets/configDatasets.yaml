@@ -18,8 +18,8 @@
     tree: "sample_sum"
     # MC files
     filePathList:
-      - "${TOYND_DATA}/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_GUNDAMINPUT.root"
-      - "${TOYND_DATA}/T2KND_RHC_numubar_C8H8_NEUT580_1M_0000_GUNDAMINPUT.root"
+      - "${DATASET_FOLDER}/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_GUNDAMINPUT.root"
+      - "${DATASET_FOLDER}/T2KND_RHC_numubar_C8H8_NEUT580_1M_0000_GUNDAMINPUT.root"
 
 
   data:
@@ -27,5 +27,5 @@
       tree: "sample_sum"
       # Data files (same as MC here)
       filePathList:
-        - "${TOYND_DATA}/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_GUNDAMINPUT.root"
-        - "${TOYND_DATA}/T2KND_RHC_numubar_C8H8_NEUT580_1M_0000_GUNDAMINPUT.root"
+        - "${DATASET_FOLDER}/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_GUNDAMINPUT.root"
+        - "${DATASET_FOLDER}/T2KND_RHC_numubar_C8H8_NEUT580_1M_0000_GUNDAMINPUT.root"

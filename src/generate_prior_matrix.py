@@ -7,9 +7,10 @@ def main():
     p = argparse.ArgumentParser(
         description="Generate a prior covariance matrix with localized correlations and save it to a ROOT file."
     )
-    p.add_argument("--scale", type=float, default=1.0, help="Covariance scale factor")
+    p.add_argument("--scale", type=float, default=1.0, help="Order of magnitude of sqrt(diag) elements")
     p.add_argument("--output_file", "-o", type=str, required=True, help="Output ROOT file name")
     p.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
+    p.add_argument("--filter", "-f", type=float, default=0.6, help="Sigma of Gaussian filter for smoothing")
     args = p.parse_args()
 
     scale = args.scale
@@ -23,24 +24,31 @@ def main():
     np.random.seed(seed)
     # variance on diagonal
     diagonal = scale * np.random.normal(loc=1.0, scale=0.1, size=N)
-    M = np.diag(diagonal)
+    for i, d in enumerate(diagonal):
+        while d <= 0:
+            diagonal[i] = scale * np.random.normal(loc=1.0, scale=0.1, size=N)
+    L = np.diag(diagonal)
     # add noise
-    M += np.random.normal(loc=0.0, scale=scale*0.1, size=(N, N))
+    L += np.random.normal(loc=0.0, scale=scale*0.1, size=(N, N))
     # add a few localized correlated blobs
     for _ in range(4):                    # number of blobs
         x = np.random.randint(0, N)
-        y = np.random.randint(x, N)
+        y = np.random.randint(0, x)
         amp = np.random.uniform(-scale, scale)
-        M[x, y] += amp
-        # print(f"Added blob at ({x}, {y}) with amplitude {amp:.3f}")
+        L[x, y] += amp
+        if (amp < 0):
+            print(f"Anticorrelation added at ({x}, {y}) with amplitude {amp:.3f}")
+        else:
+            print(f"Correlation added at ({x}, {y}) with amplitude {amp:.3f}")
+
     # smooth to create correlations (tune sigma for correlation length)
-    M = gaussian_filter(M, sigma=0.6)
+    L = gaussian_filter(L, sigma=0.6)
     # add back some noise so it’s not too smooth
-    M += np.random.normal(loc=0.0, scale=scale*0.03, size=(N, N))
-    # symmetrize
-    for i in range(N):
-        for j in range(i + 1, N):
-            M[j, i] = M[i, j]
+    L += np.random.normal(loc=0.0, scale=scale*0.03, size=(N, N))
+    # make it lower triangular
+    L = np.tril(L)
+    # compute covariance matrix. This is positive definite and symmetric
+    M = L @ L.T
 
     # convert to TMatrixT<double> format and save to root file
     matrix = ROOT.TMatrixT('double')(N, N)
