@@ -89,6 +89,8 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
 
     # dummy weights branch (all weights = 1.0)
     weights_list = [1.0] * len(SelectedSample_list)
+    # isRHC branch
+    isRHC_list = [0 if isFHC else 1] * len(SelectedSample_list)
 
     dictionary = {
         "SelectedSample": to_1d_numpy(SelectedSample_list, dtype=np.int32, int_fill=-1),
@@ -99,6 +101,7 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         "Reaction": to_1d_numpy(Reaction_list, dtype=np.int32, int_fill=-999),
         "Enu": to_1d_numpy(Enu_list, dtype=np.float32, float_fill=-999.0),
         "weight": to_1d_numpy(weights_list, dtype=np.float32, float_fill=1.0),
+        "isRHC": to_1d_numpy(isRHC_list, dtype=np.int32, int_fill=0),
     }
 
 
