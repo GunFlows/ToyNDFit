@@ -44,7 +44,7 @@ class NUISANCEEvent:
             max_index = np.argmax(np.sqrt(Px**2 + Py**2 + Pz**2))
             return np.sqrt(Px[max_index]**2 + Py[max_index]**2 + Pz[max_index]**2)
 
-        return np.sqrt(Px[0]**2 + Py[0]**2 + Pz[0]**2)
+        return 1000 * np.sqrt(Px[0]**2 + Py[0]**2 + Pz[0]**2) # MeV/c!!!
 
     def CosThetamu(self):
         """Calculate muon cos(theta) from Px, Py, Pz."""
