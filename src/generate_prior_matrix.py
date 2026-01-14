@@ -7,18 +7,22 @@ def main():
     p = argparse.ArgumentParser(
         description="Generate a prior covariance matrix with localized correlations and save it to a ROOT file."
     )
+    p.add_argument("--size", type=int, default=22, help="matrix size (NxN)")
     p.add_argument("--scale", type=float, default=1.0, help="Order of magnitude of sqrt(diag) elements")
     p.add_argument("--output_file", "-o", type=str, required=True, help="Output ROOT file name")
     p.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
     p.add_argument("--filter", "-f", type=float, default=0.6, help="Sigma of Gaussian filter for smoothing")
+    p.add_argument("--blobs", "-b", type=int, default=4, help="Number of localized correlated blobs to add")
     args = p.parse_args()
 
     scale = args.scale
     output_file_name = args.output_file
     seed = args.seed
+    filter_sigma = args.filter
+    blobs = args.blobs
 
     # matrix size
-    N = 22
+    N = args.size
 
     # set random seed for reproducibility
     np.random.seed(seed)
@@ -29,9 +33,9 @@ def main():
             diagonal[i] = scale * np.random.normal(loc=1.0, scale=0.1, size=N)
     L = np.diag(diagonal)
     # add noise
-    L += np.random.normal(loc=0.0, scale=scale*0.1, size=(N, N))
+    L += np.random.normal(loc=0.0, scale=scale*filter_sigma*0.17, size=(N, N))
     # add a few localized correlated blobs
-    for _ in range(4):                    # number of blobs
+    for _ in range(blobs):                    # number of blobs
         x = np.random.randint(0, N)
         y = np.random.randint(0, x)
         amp = np.random.uniform(-scale, scale)
@@ -42,9 +46,9 @@ def main():
             print(f"Correlation added at ({x}, {y}) with amplitude {amp:.3f}")
 
     # smooth to create correlations (tune sigma for correlation length)
-    L = gaussian_filter(L, sigma=0.6)
+    L = gaussian_filter(L, sigma=filter_sigma)
     # add back some noise so it’s not too smooth
-    L += np.random.normal(loc=0.0, scale=scale*0.03, size=(N, N))
+    L += np.random.normal(loc=0.0, scale=scale*filter_sigma*0.05, size=(N, N))
     # make it lower triangular
     L = np.tril(L)
     # compute covariance matrix. This is positive definite and symmetric
