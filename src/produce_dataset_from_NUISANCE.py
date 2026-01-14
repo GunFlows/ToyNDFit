@@ -2,6 +2,8 @@
 from utils import *
 import plot_utils
 import argparse
+from spline_generator import SplineGenerator
+import ROOT
 
 # Function to read the NUISANCE flat trees, smear the momenta based on a realistic momentum and angle resolution, and
 # generates a "GUNDAM dataset": basically a root file with a TTree containing FS kinematics.
@@ -43,6 +45,8 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
     start_time = datetime.datetime.now()
     f = NUISANCEFile(file_path, tree_name, relevant_keys=None, step=10000)
     num_entries = len(f)
+    if (max_events < 0):
+        max_events = num_entries
 
     # OUTPUT BRANCHES LISTS
     SelectedSample_list = []
@@ -52,15 +56,24 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
     TrueCosThetamu_list = []
     Reaction_list = []
     Enu_list = []
+    # Splines (to be saved as TGraphs in the output tree)
+    Spline_Enu_list = []
+    Spline_PP_list = []
+    Spline_FSIstrength_list = []
 
-    pbar = tqdm(total=100)
+    # instantiate spline generators
+    Spline_Enu = SplineGenerator(spline_type="polynomial", power=3, range_width=-0.1, kin_min=0.0, kin_max=5) # enhance events with low neutrino energy
+    Spline_PP = SplineGenerator(spline_type="polynomial", power=3, range_width=0.1, kin_min=-1, kin_max=1) # enhance/reduce pion production events as a function of pion energy
+    Spline_FSIstrength = SplineGenerator(spline_type="polynomial", power=3, range_width=0.3, kin_min=-0.2, kin_max=0.2) # reweight FSI strength
+
+    pbar = tqdm(total=max_events)
     for i, event in enumerate(f):
         # limit number of events for testing
         if i > max_events and max_events > 0:
             break
         # progress bar
-        if (i + 1) % (num_entries // 100) == 0:
-            pbar.update(1)
+        if (i + 1) % (max_events // 50) == 0:
+            pbar.update(max_events // 50)
         # Perform selection
         sample = event.PerformSelection(isFHC)
 
@@ -71,6 +84,17 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         # smear Pmu, CosThetamu
         Pmu_smeared, CosThetamu_smeared = smear(Pmu, CosThetamu, pmu_map, cthetamap)
 
+        # is pion production event?
+        isPP = event.isPP()
+        pion_energy = event.total_pion_energy() if isPP else 0.0
+
+        Spline_Enu_TGraph = Spline_Enu.generate_graph(Enu, kin_key="Enu")
+        Spline_FSIstrength_TGraph = Spline_FSIstrength.generate_graph(event.FSI_strength(), kin_key="FSI_strength")
+        if isPP:
+            Spline_PP_TGraph = Spline_PP.generate_graph(pion_energy, kin_key="pion_energy")
+        else:
+            Spline_PP_TGraph = Spline_PP.empty_graph()
+
         # fill lists!
         SelectedSample_list.append(sample)
         Pmu_list.append(Pmu_smeared)
@@ -80,12 +104,16 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         Reaction_list.append(event.Mode)
         Enu_list.append(Enu)
 
+        Spline_Enu_list.append(Spline_Enu_TGraph)
+        Spline_PP_list.append(Spline_PP_TGraph)
+        Spline_FSIstrength_list.append(Spline_FSIstrength_TGraph)
+
     pbar.close()
 
     f.close()
     end_time = datetime.datetime.now()
     elapsed_time = end_time - start_time
-    print(f"Finished reading {num_entries} entries in {elapsed_time}.")
+    print(f"Finished reading {max_events} entries in {elapsed_time}.")
 
     # dummy weights branch (all weights = 1.0)
     weights_list = [1.0] * len(SelectedSample_list)
@@ -102,10 +130,85 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         "Enu": to_1d_numpy(Enu_list, dtype=np.float32, float_fill=-999.0),
         "weight": to_1d_numpy(weights_list, dtype=np.float32, float_fill=1.0),
         "isRHC": to_1d_numpy(isRHC_list, dtype=np.int32, int_fill=0),
+        "Spline_Enu": to_1d_numpy(Spline_Enu_list, dtype=ROOT.TGraph, int_fill=None),  # special handling for TGraph
+        "Spline_PP": to_1d_numpy(Spline_PP_list, dtype=ROOT.TGraph, int_fill=None),  # special handling for TGraph
+        "Spline_FSIstrength": to_1d_numpy(Spline_FSIstrength_list, dtype=ROOT.TGraph, int_fill=None),  # special handling for TGraph
     }
 
 
     return dictionary
+
+
+def write_dictionary_to_tree(dictionary, output_root_file):
+    """
+    Write the dictionary of lists to a ROOT TTree, using pyROOT (supports TGraphs).
+
+    Parameters
+    ----------
+    dictionary : dict
+        Dictionary of lists to write.
+    output_root_file : str
+        Path to the output ROOT file.
+    """
+
+    # create ROOT file and TTree
+    root_file = ROOT.TFile(output_root_file, "RECREATE")
+    tree = ROOT.TTree("sample_sum", "GUNDAM input dataset from NUISANCE")
+
+    # create branches
+    normal_branches = {}
+    special_branches = {}
+    for key, values in dictionary.items():
+        if len(values) == 0:
+            print(f"Warning: empty values for key {key}, skipping branch creation.")
+            continue
+
+        if isinstance(values[0], ROOT.TGraph):
+            # special handling for TGraph branch
+            special_branches[key] = ROOT.TClonesArray("TGraph")
+            tree.Branch(key, special_branches[key], 32000, 0)
+        else:
+            # normal branches
+            arr = np.array(values)
+            # determine type
+            dtype = arr.dtype
+            if np.issubdtype(dtype, np.integer):
+                buf = np.zeros(1, dtype=np.int32)
+                tree.Branch(key, buf, f"{key}/I")
+            elif np.issubdtype(dtype, np.floating):
+                buf = np.zeros(1, dtype=np.float32)
+                tree.Branch(key, buf, f"{key}/F")
+            else:
+                raise ValueError(f"Unsupported dtype {dtype} for key {key}")
+            normal_branches[key] = buf
+
+    num_entries = len(next(iter(dictionary.values())))
+    # fill tree (intantiate a progress bar)
+    pbar = tqdm(total=num_entries)
+    for i in range(num_entries):
+        # fill numeric branches
+        for key, buf in normal_branches.items():
+            buf[0] = dictionary[key][i]
+
+        # fill TGraph branches
+        for key, tca in special_branches.items():
+            tca.Clear("C")
+            g = dictionary[key][i]
+            # placement new into TClonesArray
+            ROOT.TClonesArray(tca).ConstructedAt(0)
+            tca[0] = g  # PyROOT magic works here
+
+        tree.Fill()
+        # progress bar
+        if (i + 1) % (num_entries // 50) == 0:
+            pbar.update(num_entries // 50)
+
+    pbar.close()
+
+
+    root_file.Write()
+    root_file.Close()
+    print(f"Wrote output ROOT file: {output_root_file}")
 
 
 if __name__ == "__main__":
@@ -141,11 +244,18 @@ if __name__ == "__main__":
     Reaction_list = data["Reaction"]
     plot_utils.plot_samples(SelectedSample_list, Pmu_list, CosThetamu_list, Reaction_list, out_dir=out_dir)
 
-    # finally, create a root file with a TTree containing all the information in the dictionary
     output_root_file = file_path.replace("_NUISFLAT.root", "_GUNDAMINPUT.root")
-    with uproot.recreate(output_root_file) as f_out:
-        f_out.mktree("sample_sum",data)
+    write_dictionary_to_tree(data, output_root_file)
 
-        print(f"Created output ROOT file: {output_root_file}")
-        print(f"Branches: {list(data.keys())}")
-        print(f"Created plots in {out_dir} directory.")
+
+
+
+    #
+    # # finally, create a root file with a TTree containing all the information in the dictionary
+    # output_root_file = file_path.replace("_NUISFLAT.root", "_GUNDAMINPUT.root")
+    # with uproot.recreate(output_root_file) as f_out:
+    #     f_out.mktree("sample_sum",data)
+    #
+    #     print(f"Created output ROOT file: {output_root_file}")
+    #     print(f"Branches: {list(data.keys())}")
+    #     print(f"Created plots in {out_dir} directory.")

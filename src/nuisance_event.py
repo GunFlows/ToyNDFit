@@ -64,11 +64,42 @@ class NUISANCEEvent:
         P = np.sqrt(Px[0]**2 + Py[0]**2 + Pz[0]**2)
         return Pz[0] / P
 
+    def isPP(self):
+        """Return 1 if the event is a pion production event, 0 otherwise."""
+        pdg = np.array(self.pdg)
+        pions_mask = (pdg == 211) | (pdg == -211) | (pdg == 111)
+        if np.any(pions_mask):
+            return 1
+        else:
+            return 0
+
+    def total_pion_energy(self):
+        """Calculate total energy of all pions in the event."""
+        pdg = np.array(self.pdg)
+        pions_mask = (pdg == 211) | (pdg == -211) | (pdg == 111)
+        if not np.any(pions_mask):
+            return 0.0
+        E = np.array(self.E)[pions_mask]
+        total_E = np.sum(E)
+        return total_E
+
+    def FSI_strength(self):
+        """Return the FSI strength of the event computed as energy of the escaping proton - energy of the proton at vertex."""
+
+        pdg_vert = np.array(self.pdg_vert)
+        proton_mask = (pdg_vert == 2212)
+        pdg_out = np.array(self.pdg)
+        proton_mask_out = (pdg_out == 2212)
+        # print(f"N protons at vertex: {np.sum(proton_mask)}, N protons out: {np.sum(proton_mask_out)}")
+        K_proton_vertex = np.sum(np.array(self.E_vert)[proton_mask]) - 0.93827*np.sum(proton_mask)
+        K_proton_out = np.sum(np.array(self.E)[proton_mask_out]) - 0.93827*np.sum(proton_mask_out)
+        # print(f"K_proton_vertex: {K_proton_vertex}, K_proton_out: {K_proton_out}")
+        FSI_strength_value = K_proton_vertex - K_proton_out
+
+        return FSI_strength_value
+
     def vectorPmu(self):
         """Return the muon momentum vector (Px, Py, Pz) as a list."""
-
-
-
         pdg = np.array(self.pdg)
         muon_mask = (pdg == 13) | (pdg == -13)
         if not np.any(muon_mask):

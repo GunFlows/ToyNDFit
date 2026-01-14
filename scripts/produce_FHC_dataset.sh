@@ -15,4 +15,5 @@ mkdir -p ${output_plots_dir}
 python ${executable} \
       --file_path ${input_nuisance_file} \
       --isFHC 1 \
+      --max_events 1000 \
       --output_plots_dir ${output_plots_dir}
