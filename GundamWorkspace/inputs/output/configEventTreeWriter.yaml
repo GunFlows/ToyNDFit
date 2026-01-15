@@ -1,0 +1,28 @@
+# Parameters for the event dial writer
+isEnabled: true
+
+
+dialWriterConfig:
+  # Disable with this toggle
+  isEnabled: false
+
+  dialList:
+    - name: "Spline Systematics/Spline_Enu" # used to generate branch name
+      parSetName: "Spline Systematics"
+      parName: "Spline_Enu"
+      nPoints: 100
+      parBounds: [0.5, 1.5]
+
+    - name: "Spline Systematics/Spline_PP"
+      parSetName: "Spline Systematics"
+      parName: "Spline_PP"
+      nPoints: 100
+      parBounds: [0.5, 1.5]
+
+    - name: "Spline Systematics/Spline_FSI"
+      parSetName: "Spline Systematics"
+      parName: "Spline_FSI"
+      nPoints: 100
+      parBounds: [0.5, 1.5]
+
+

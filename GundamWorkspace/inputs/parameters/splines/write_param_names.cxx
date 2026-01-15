@@ -1,17 +1,22 @@
 
-// open a root file that contains a TMatrixD named "prior_covariance_matrix". Copy it over to an output file together with:
+// Opens a root file that contains a TMatrixD named "prior_covariance_matrix".
+// Copy it over to an output file together with:
 //  parameterNameTObjArray: param_names
 //  parameterPriorTVectorD: priors
 //  parameterLowerBoundsTVectorD: lower_bounds
 //  parameterUpperBoundsTVectorD: upper_bounds
 
+// This comes from the cov matrix built with another python script,
+// and reproduces the strucutre used in the gundam configuratun
+
 int write_param_names(){
-
+  string infile_name = "matrix.root";
   string outfile_name = "spline_covariance_matrix_with_names.root";
-  TFile outfile(outfile_name.c_str(),"RECREATE");
-  TFile* infile = new TFile("matrix.root","READ");
-  TMatrixD* cov_matrix = (TMatrixD*) infile->Get("prior_covariance_matrix");
 
+  TFile outfile(outfile_name.c_str(),"RECREATE");
+  TFile* infile = new TFile(infile_name.c_str(),"READ");
+
+  TMatrixD* cov_matrix = (TMatrixD*) infile->Get("prior_covariance_matrix");
 
   vector<string> param_names = {
     "Spline_Enu",

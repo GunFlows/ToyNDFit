@@ -1,0 +1,37 @@
+
+varDictionnaries:
+  - name: "ReactionCode"
+    dictionary: "./inputs/output/dictionaries/ReactionCodesDict.yaml"
+
+histogramsDefinition:
+  - varToPlot: "Raw"
+
+  - varToPlot: "Pmu"
+#    splitVars: ["", "ReactionCode"]
+    useSampleBinning: true # if not possible, error
+    rescaleAsBinWidth: true # default true -> to look like a PDF
+    rescaleBinFactor: 100 # / 100 MeV
+    xMax: 2000.
+    xTitle: "p_{#mu} (MeV)"
+    yTitle: "Counts / 100 MeV"
+
+  - varToPlot: "CosThetamu"
+#    splitVars: ["", "ReactionCode"]
+    useSampleBinning: true
+    xTitle: "#{cos}(#{theta}_{#mu})"
+  #      noData: true
+  #      binningFile: ""
+
+  - varToPlot: "CosThetamu"
+    prefix: "_unNorm"
+#    splitVars: [ "", "ReactionCode" ]
+    useSampleBinning: true
+    rescaleAsBinWidth: false # show the true stat in each bin
+    xTitle: "#{cos}(#{theta}_{#mu})"
+
+canvasParameters:
+  height: 700
+  width: 1200
+  nbXplots: 3
+  nbYplots: 2
+
