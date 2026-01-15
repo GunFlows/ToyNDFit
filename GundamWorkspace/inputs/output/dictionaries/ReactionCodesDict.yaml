@@ -1,0 +1,57 @@
+# ReactionCode Dictionary
+
+# Nuisance reaction codes
+# https://nuisance.hepforge.org/tutorials/interaction_modes.html
+- { value: 0, title: "UNDEFINED", color: 1 } # kBlack
+- { value: 1, title: "#nu,N #rightarrow l-,P", color: 801 }
+- { value: 2, title: "#nu,N+X #rightarrow l-,P+X  (X=(N or P))", color: 634 }
+- { value: 11, title: "#nu,P #rightarrow l-,P,#pi^{+}", color: 413 }
+- { value: 12, title: "#nu,N #rightarrow l-,P,#pi^{0}", color: 843 }
+- { value: 13, title: "#nu,N #rightarrow l-,N,#pi^{+}", color: 867 }
+- { value: 16, title: "#nu,O(16) #rightarrow l-,O(16),#pi^{+}", color: 430 }
+- { value: 17, title: "#nu,N #rightarrow l-,P,#gamma", color: 593 }
+- { value: 21, title: "#nu,(N or P) #rightarrow l-,(N or P),mult. #pi", color: 593 }
+- { value: 22, title: "#nu,N #rightarrow l-,P,#Eta_{0}", color: 602 }
+- { value: 23, title: "#nu,N #rightarrow l-,#Lambda,K^{+}", color: 797 }
+- { value: 26, title: "#nu,(N or P) #rightarrow l-,(N or P),Mesons", color: 602 }
+- { value: 31, title: "#nu,N #rightarrow #nu,N,#pi^{0}", color: 809 }
+- { value: 32, title: "#nu,P #rightarrow #nu,P,#pi^{0}", color: 909 }
+- { value: 33, title: "#nu,N #rightarrow #nu,P,#pi^{-}", color: 880 }
+- { value: 34, title: "#nu,P #rightarrow #nu,N,#pi^{+}", color: 408 }
+- { value: 36, title: "#nu,O(16) #rightarrow #nu,O(16),#pi^{0}", color: 433 }
+- { value: 38, title: "#nu,N #rightarrow #nu,N,#gamma", color: 796 }
+- { value: 39, title: "#nu,P #rightarrow #nu,P,#gamma", color: 806 }
+- { value: 41, title: "#nu,(N or P) #rightarrow #nu,(N or P),mult. #pi", color: 606 }
+- { value: 42, title: "#nu,N #rightarrow #nu,N,#Eta_{0}", color: 423 }
+- { value: 43, title: "#nu,P #rightarrow #nu,P,#Eta_{0}", color: 406 }
+- { value: 44, title: "#nu,N #rightarrow #nu,#Lambda,K^{0}", color: 867 }
+- { value: 45, title: "#nu,P #rightarrow #nu,#Lambda,K^{+}", color: 867 }
+- { value: 46, title: "#nu,(N or P) #rightarrow #nu,(N or P),Mesons", color: 867 }
+- { value: 51, title: "#nu,P #rightarrow #nu,P", color: 867 }
+- { value: 52, title: "#nu,N #rightarrow #nu,N", color: 867 }
+- { value: -1, title: "#bar{#nu},P #rightarrow l+,N", color: 801, fillStyle: 3001 }
+- { value: -2, title: "#nu,P+X #rightarrow l-,N+X  (X=(N or P))", color: 634, fillStyle: 3001 }
+- { value: -11, title: "#bar{#nu},N #rightarrow l+,N,#pi^{-}", color: 413, fillStyle: 3001 }
+- { value: -12, title: "#bar{#nu},P #rightarrow l+,N,#pi^{0}", color: 843, fillStyle: 3001 }
+- { value: -13, title: "#bar{#nu},P #rightarrow l+,P,#pi^{-}", color: 867, fillStyle: 3001 }
+- { value: -16, title: "#bar{#nu},O(16) #rightarrow l+,O(16),#pi^{-}", color: 867, fillStyle: 3001 }
+- { value: -17, title: "#bar{#nu},P #rightarrow l+,N,#gamma", color: 867, fillStyle: 3001 }
+- { value: -21, title: "#bar{#nu},(N or P) #rightarrow l+,(N or P),mult. #pi", color: 593, fillStyle: 3001 }
+- { value: -22, title: "#bar{#nu},P #rightarrow l+,N,#Eta_{0}", color: 867, fillStyle: 3001 }
+- { value: -23, title: "#bar{#nu},P #rightarrow l+,#Lambda,K^{0}", color: 867, fillStyle: 3001 }
+- { value: -26, title: "#bar{#nu},(N or P) #rightarrow l+,(N or P),Mesons", color: 602, fillStyle: 3001 }
+- { value: -31, title: "#bar{#nu},N #rightarrow #bar{#nu},N,#pi^{0}", color: 867, fillStyle: 3001 }
+- { value: -32, title: "#bar{#nu},P #rightarrow #bar{#nu},P,#pi^{0}", color: 867, fillStyle: 3001 }
+- { value: -33, title: "#bar{#nu},N #rightarrow #bar{#nu},P,#pi^{-}", color: 867, fillStyle: 3001 }
+- { value: -34, title: "#bar{#nu},P #rightarrow #bar{#nu},N,#pi^{+}", color: 867, fillStyle: 3001 }
+- { value: -36, title: "#bar{#nu},O(16) #rightarrow #bar{#nu},O(16),#pi^{0}", color: 867, fillStyle: 3001 }
+- { value: -38, title: "#bar{#nu},N #rightarrow #bar{#nu},N,#gamma", color: 867, fillStyle: 3001 }
+- { value: -39, title: "#bar{#nu},P #rightarrow #bar{#nu},P,#gamma", color: 867, fillStyle: 3001 }
+- { value: -41, title: "#bar{#nu},(N or P) #rightarrow #bar{#nu},(N or P),mult. #pi", color: 867, fillStyle: 3001 }
+- { value: -42, title: "#bar{#nu},N #rightarrow #bar{#nu},N,#Eta_{0}", color: 867, fillStyle: 3001 }
+- { value: -43, title: "#bar{#nu},P #rightarrow #bar{#nu},P,#Eta_{0}", color: 867, fillStyle: 3001 }
+- { value: -44, title: "#bar{#nu},N #rightarrow #bar{#nu},#Lambda,K^{0}", color: 867, fillStyle: 3001 }
+- { value: -45, title: "#bar{#nu},P #rightarrow #bar{#nu},#Lambda,K^{+}", color: 867, fillStyle: 3001 }
+- { value: -46, title: "#bar{#nu},(N or P) #rightarrow #bar{#nu},(N or P),Mesons", color: 867, fillStyle: 3001 }
+- { value: -51, title: "#bar{#nu},P #rightarrow #bar{#nu},P", color: 867, fillStyle: 3001 }
+- { value: -52, title: "#bar{#nu},N #rightarrow #bar{#nu},N", color: 867, fillStyle: 3001 }
