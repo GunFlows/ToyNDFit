@@ -32,7 +32,7 @@
   allowPca: false
 
   #  covarianceMatrixFilePath: "./inputs/parameters/xsec/xsec_covariance_banff_2021a_v13_noFlux_050122_Mirror2p2hShape_MirrorRESEb_splineRS.root"
-  covarianceMatrixFilePath: "./inputs/parameters/splines/covariance_diagonal_with_names.root"
+  covarianceMatrixFilePath: "./inputs/parameters/splines/cov_diagonal_with_names.root"
 
   covarianceMatrixTMatrixD: prior_covariance_matrix
   parameterNameTObjArray: param_names
@@ -67,7 +67,7 @@
           maxDialResponse: 100
           allowDialExtrapolation: true
 
-    - name: "Spline_FSI" # enhances/depletes events based on FSI strength
+    - name: "Spline_FSI" # enhances/depletes events as a function of FSI strength
       isEnabled: true
       dialSetDefinitions:
         - dialsType: Spline

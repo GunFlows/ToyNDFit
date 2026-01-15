@@ -6,22 +6,30 @@
 //  parameterLowerBoundsTVectorD: lower_bounds
 //  parameterUpperBoundsTVectorD: upper_bounds
 
-// This comes from the cov matrix built with another python script,
-// and reproduces the strucutre used in the gundam configuratun
+// Requires input matrix generated with src/generate_prior_matrix.py
+// and saves other info reproducing the structure used in the gundam configuration
 
 int write_param_names(){
-  string infile_name = "matrix.root";
-  string outfile_name = "spline_covariance_matrix_with_names.root";
+  string infile_name = "cov_diagonal.root";
+  string outfile_name = infile_name.substr(0,infile_name.find_last_of(".")) + "_with_names.root";
+
 
   TFile outfile(outfile_name.c_str(),"RECREATE");
   TFile* infile = new TFile(infile_name.c_str(),"READ");
 
   TMatrixD* cov_matrix = (TMatrixD*) infile->Get("prior_covariance_matrix");
+  if (!cov_matrix) {
+    cerr << "Error: Could not find 'prior_covariance_matrix' in " << infile_name << endl;
+    return 1;
+  }
+  int cov_dimension = cov_matrix->GetNrows();
+  cout << "Reading " << cov_dimension << "x" << cov_dimension << " cov matrix from " << infile_name << endl;
+
 
   vector<string> param_names = {
     "Spline_Enu",
     "Spline_PP",
-    "Spline_FSIstrength",
+    "Spline_FSI",
     // Add more parameter names as needed
   };
 
@@ -47,7 +55,12 @@ int write_param_names(){
   };
 
 
-
+  int num_params = param_names.size();
+  if (cov_dimension != num_params) {
+    cerr << "Error: Dimension of covariance matrix (" << cov_dimension
+         << ") does not match number of parameter names (" << num_params << ")." << endl;
+    return 1;
+  }
 
 
   // Convert vectors to ROOT objects and save to output file
@@ -77,6 +90,6 @@ int write_param_names(){
   outfile.Close();
   infile->Close();
 
-  cout << "Success. Wrote to " << outfile_name << endl;
+  cout << "Successfully wrote to " << outfile_name << endl;
   return 0;
 }
