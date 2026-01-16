@@ -60,11 +60,15 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
     Spline_Enu_list = []
     Spline_PP_list = []
     Spline_FSIstrength_list = []
+    Spline_mirror_q0_list = []
+    Spline_mirror_q3_list = []
 
     # instantiate spline generators
-    Spline_Enu = SplineGenerator(spline_type="polynomial", power=3, range_width=-0.1, kin_min=0.0, kin_max=5) # enhance events with low neutrino energy
-    Spline_PP = SplineGenerator(spline_type="polynomial", power=3, range_width=0.1, kin_min=-1, kin_max=1) # enhance/reduce pion production events as a function of pion energy
+    Spline_Enu = SplineGenerator(spline_type="polynomial", power=3, range_width=-0.3, kin_min=0.0, kin_max=5) # enhance events with low neutrino energy
+    Spline_PP = SplineGenerator(spline_type="polynomial", power=3, range_width=0.3, kin_min=-1, kin_max=1) # enhance/reduce pion production events as a function of pion energy
     Spline_FSIstrength = SplineGenerator(spline_type="polynomial", power=3, range_width=0.3, kin_min=-0.2, kin_max=0.2) # reweight FSI strength
+    Spline_mirror_q0 = SplineGenerator(spline_type="mirrored", power=3, range_width=0.3, kin_min=0, kin_max=0.5, min_fixer = 1) # reweight events based on  q0
+    Spline_mirror_q3 = SplineGenerator(spline_type="mirrored", power=3, range_width=0.3, kin_min=0, kin_max=0.5, min_fixer=1) # reweight events based on  q3
 
     pbar = tqdm(total=max_events)
     for i, event in enumerate(f):
@@ -95,6 +99,9 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         else:
             Spline_PP_TGraph = Spline_PP.empty_graph()
 
+        Spline_mirror_q0_TGraph = Spline_mirror_q0.generate_graph(event.q0, kin_key="mirror_q0", n_points=30, range_min=-5, range_max=5)
+        Spline_mirror_q3_TGraph = Spline_mirror_q3.generate_graph(event.q3, kin_key="mirror_q3", n_points=30, range_min=-5, range_max=5)
+
         # fill lists!
         SelectedSample_list.append(sample)
         Pmu_list.append(Pmu_smeared)
@@ -107,6 +114,8 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         Spline_Enu_list.append(Spline_Enu_TGraph)
         Spline_PP_list.append(Spline_PP_TGraph)
         Spline_FSIstrength_list.append(Spline_FSIstrength_TGraph)
+        Spline_mirror_q0_list.append(Spline_mirror_q0_TGraph)
+        Spline_mirror_q3_list.append(Spline_mirror_q3_TGraph)
 
     pbar.close()
 
@@ -130,9 +139,12 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         "Enu": to_1d_numpy(Enu_list, dtype=np.float32, float_fill=-999.0),
         "weight": to_1d_numpy(weights_list, dtype=np.float32, float_fill=1.0),
         "isRHC": to_1d_numpy(isRHC_list, dtype=np.int32, int_fill=0),
-        "Spline_Enu": to_1d_numpy(Spline_Enu_list, dtype=ROOT.TGraph, int_fill=None),  # special handling for TGraph
-        "Spline_PP": to_1d_numpy(Spline_PP_list, dtype=ROOT.TGraph, int_fill=None),  # special handling for TGraph
-        "Spline_FSIstrength": to_1d_numpy(Spline_FSIstrength_list, dtype=ROOT.TGraph, int_fill=None),  # special handling for TGraph
+        # special handling for TGraph branches
+        "Spline_Enu": to_1d_numpy(Spline_Enu_list, dtype=ROOT.TGraph, int_fill=None),
+        "Spline_PP": to_1d_numpy(Spline_PP_list, dtype=ROOT.TGraph, int_fill=None),
+        "Spline_FSIstrength": to_1d_numpy(Spline_FSIstrength_list, dtype=ROOT.TGraph, int_fill=None),
+        "Spline_mirror_q0": to_1d_numpy(Spline_mirror_q0_list, dtype=ROOT.TGraph, int_fill=None),
+        "Spline_mirror_q3": to_1d_numpy(Spline_mirror_q3_list, dtype=ROOT.TGraph, int_fill=None),
     }
 
 

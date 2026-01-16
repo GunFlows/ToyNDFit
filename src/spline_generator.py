@@ -14,6 +14,7 @@ class SplineGenerator:
                     range_width: float = None,
                     kin_min: float = None,
                     kin_max: float = None,
+                    min_fixer: float = None
                  ):
         """
         Initialize the SplineGenerator with given x and y points.
@@ -26,10 +27,16 @@ class SplineGenerator:
                 raise ValueError("For polynomial spline type, you must provide: power, range_width, kin_min and kin_max.")
             self.spline = polynomial_spline(power, range_width, kin_min, kin_max)
         # I will add more spline types in the future
+        elif (spline_type == "mirrored"):
+            if (power is None or range_width is None or kin_min is None or kin_max is None or min_fixer is None):
+                raise ValueError("For mirrored spline type, you must provide: power, range_width, kin_min, kin_max and min_fixer.")
+            if (min_fixer > 1.5 or power > 7):
+                raise ValueError("min_fixer must be <= 1.5 and power must be <= 7 for mirrored spline type to avoid instabilities.")
+            self.spline = mirrored_spline(power, range_width, kin_min, kin_max, min_fixer)
         else:
             raise ValueError(f"Spline type {spline_type} not recognized.")
 
-    def generate_graph(self, kin_val, kin_key = "kin_key", n_points: int = 5, range_min: float = 0.5, range_max: float = 1.5):
+    def generate_graph(self, kin_val, kin_key = "kin_key", n_points: int = 10, range_min: float = 0.5, range_max: float = 1.5):
         """
         Generate a spline graph from the provided points.
         Parameters
@@ -89,8 +96,59 @@ class polynomial_spline:
 
     def evaluate(self, x, kin_val):
         if kin_val > self.kin_max:
-            return self.__call__(x, self.kin_max)
+            val = self.__call__(x, self.kin_max)
+            if val < 0:
+                return 0
+            else:
+                return val
         elif kin_val < self.kin_min:
-            return self.__call__(x, self.kin_min)
+            val = self.__call__(x, self.kin_min)
+            if val < 0:
+                return 0
+            else:
+                return val
+        val = self.__call__(x, kin_val)
+        if val < 0:
+            return 0
+        else:
+            return val
 
-        return self.__call__(x, kin_val)
+class mirrored_spline:
+    def __init__(self, power, range_width, kin_min, kin_max, min_fixer):
+        self.power = power
+        self.range_width = range_width
+        self.kin_min = kin_min
+        self.kin_max = kin_max
+        if min_fixer == 0:
+            raise ValueError("min_fixer cannot be zero for mirrored_spline.")
+        self.min_fixer = min_fixer
+
+    def __call__(self, x, kin_val):
+        if self.kin_max <= self.kin_min:
+            raise ValueError("kin_max and kin_min cannot be equal.")
+
+        return (
+            1
+            + self.range_width
+            * (2 * (kin_val - self.kin_min) / (self.kin_max - self.kin_min) - 1)
+            * (abs(x)**self.power - self.min_fixer*abs(x))
+        )
+
+    def evaluate(self, x, kin_val):
+        if kin_val > self.kin_max:
+            val = self.__call__(x, self.kin_max)
+            if val < 0:
+                return 0
+            else:
+                return val
+        elif kin_val < self.kin_min:
+            val = self.__call__(x, self.kin_min)
+            if val < 0:
+                return 0
+            else:
+                return val
+        val = self.__call__(x, kin_val)
+        if val < 0:
+            return 0
+        else:
+            return val

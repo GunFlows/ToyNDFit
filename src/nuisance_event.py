@@ -98,6 +98,7 @@ class NUISANCEEvent:
 
         return FSI_strength_value
 
+
     def vectorPmu(self):
         """Return the muon momentum vector (Px, Py, Pz) as a list."""
         pdg = np.array(self.pdg)
