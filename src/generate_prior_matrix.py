@@ -9,6 +9,7 @@ def main():
     )
     p.add_argument("--size", type=int, default=22, help="matrix size (NxN)")
     p.add_argument("--scale", type=float, default=1.0, help="Order of magnitude of sqrt(diag) elements")
+    p.add_argument("--diagonal", type=str, help="You can also provide a file with diagonal sqrt(elements), one per line. This overrides size and scale.")
     p.add_argument("--output_file", "-o", type=str, required=True, help="Output ROOT file name")
     p.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
     p.add_argument("--filter", "-f", type=float, default=0.6, help="Sigma of Gaussian filter for smoothing")
@@ -24,14 +25,25 @@ def main():
     # matrix size
     N = args.size
 
+
     # set random seed for reproducibility
     np.random.seed(seed)
-    # variance on diagonal
-    diagonal = scale * np.random.normal(loc=1.0, scale=0.1, size=N)
-    for i, d in enumerate(diagonal):
-        while d <= 0:
-            diagonal[i] = scale * np.random.normal(loc=1.0, scale=0.1, size=N)
-    L = np.diag(diagonal)
+
+    if args.diagonal:
+        diagonal = np.loadtxt(args.diagonal)
+        N = len(diagonal)
+        # from sigma to variance
+        diagonal = diagonal**2
+        L = np.diag(diagonal)
+        print(f"Using provided diagonal with size {N}")
+    else:
+        # variance on diagonal
+        diagonal = scale * np.random.normal(loc=1.0, scale=0.1, size=N)
+        for i, d in enumerate(diagonal):
+            while d <= 0:
+                diagonal[i] = scale * np.random.normal(loc=1.0, scale=0.1, size=N)
+        L = np.diag(diagonal)
+
     # add noise
     L += np.random.normal(loc=0.0, scale=scale*filter_sigma*0.17, size=(N, N))
     # add a few localized correlated blobs
@@ -60,6 +72,12 @@ def main():
         for j in range(N):
             matrix[i][j] = M[i, j]
 
+    # compute correlation matrix for visualization
+    corr_matrix = ROOT.TMatrixT('double')(N, N)
+    for i in range(N):
+        for j in range(N):
+            corr_matrix[i][j] = M[i, j] / np.sqrt(M[i, i] * M[j, j])
+
     # save matrix to png for visualization
     ROOT.gROOT.SetBatch(True)  # run in batch mode to avoid GUI
     c = ROOT.TCanvas('c', 'Prior Covariance Matrix', 800, 600)
@@ -73,6 +91,7 @@ def main():
     # save to root file
     output_file = ROOT.TFile(output_file_name, 'RECREATE')
     matrix.Write('prior_covariance_matrix')
+    corr_matrix.Write('prior_correlation_matrix')
     output_file.Close()
 
     print(f"Covariance matrix saved to {output_file_name}")

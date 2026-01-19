@@ -72,6 +72,7 @@ class SplineGenerator:
             The generated TGraph, to be used as a spline.
         """
         g = ROOT.TGraph(1)
+        g.SetPoint(0, 1, 1)
         g.SetTitle("No Spline")
         return g
 

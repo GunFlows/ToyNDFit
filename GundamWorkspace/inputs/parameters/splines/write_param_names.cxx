@@ -10,7 +10,7 @@
 // and saves other info reproducing the structure used in the gundam configuration
 
 int write_param_names(){
-  string infile_name = "cov_diagonal.root";
+  string infile_name = "spl6.root";
   string outfile_name = infile_name.substr(0,infile_name.find_last_of(".")) + "_with_names.root";
 
 
@@ -30,6 +30,9 @@ int write_param_names(){
     "Spline_Enu",
     "Spline_PP",
     "Spline_FSI",
+    "Spline_mirror_q0",
+    "Spline_mirror_q3",
+    "Spline_bound_W",
     // Add more parameter names as needed
   };
 
@@ -37,6 +40,9 @@ int write_param_names(){
     1.0, // Prior for Spline_Enu
     1.0, // Prior for Spline_PP
     1.0, // Prior for Spline_FSIstrength
+    1.0, // Prior for Spline_mirror_q0
+    1.0, // Prior for Spline_mirror_q3
+    1.0, // Prior for Spline_bound_W
     // Add more priors as needed
   };
 
@@ -44,6 +50,9 @@ int write_param_names(){
     -999.0, // Lower bound for Spline_Enu
     -999.0, // Lower bound for Spline_PP
     -999.0, // Lower bound for Spline_FSIstrength
+    -999.0, // Lower bound for Spline_mirror_q0
+    -999.0, // Lower bound for Spline_mirror_q3
+    -999.0, // Lower bound for Spline_bound_W
     // Add more lower bounds as needed
   };
 
@@ -51,6 +60,9 @@ int write_param_names(){
     999, // Upper bound for Spline_Enu
     999, // Upper bound for Spline_PP
     999, // Upper bound for Spline_FSIstrength
+    999, // Upper bound for Spline_mirror_q0
+    999, // Upper bound for Spline_mirror_q3
+    999, // Upper bound for Spline_bound_W
     // Add more upper bounds as needed
   };
 
