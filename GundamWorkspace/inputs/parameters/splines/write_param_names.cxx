@@ -52,7 +52,7 @@ int write_param_names(){
     -999.0, // Lower bound for Spline_FSIstrength
     -999.0, // Lower bound for Spline_mirror_q0
     -999.0, // Lower bound for Spline_mirror_q3
-    -999.0, // Lower bound for Spline_bound_W
+    -0.1, // Lower bound for Spline_bound_W
     // Add more lower bounds as needed
   };
 
@@ -65,6 +65,33 @@ int write_param_names(){
     999, // Upper bound for Spline_bound_W
     // Add more upper bounds as needed
   };
+
+  // Write summary: name, prior, sigma, lower, upper
+  cout << "Parameter Summary:" << endl;
+  cout << "----------------------------------------" << endl;
+  cout << "Name\t\tPrior\tSigma\tLower\tUpper" << endl;
+  cout << "----------------------------------------" << endl;
+  for (size_t i = 0; i < param_names.size(); ++i) {
+    double sigma = sqrt((*cov_matrix)[i][i]);
+    // sigma string with 3 decimal places
+    char sigma_buf[64];
+    snprintf(sigma_buf, sizeof(sigma_buf), "%.3f", sigma);
+    std::string sigma_str(sigma_buf);
+    if (param_names[i].length() < 15) {
+      cout << param_names[i] << "\t\t"
+           << priors[i] << "\t"
+           << sigma_str << "\t"
+           << lower_bounds[i] << "\t"
+           << upper_bounds[i] << endl;
+    } else {
+      cout << param_names[i] << "\t"
+           << priors[i] << "\t"
+           << sigma_str << "\t"
+           << lower_bounds[i] << "\t"
+           << upper_bounds[i] << endl;
+    }
+  }
+  cout << "----------------------------------------" << endl;
 
 
   int num_params = param_names.size();
