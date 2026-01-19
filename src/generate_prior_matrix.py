@@ -36,6 +36,7 @@ def main():
         diagonal = diagonal**2
         L = np.diag(diagonal)
         print(f"Using provided diagonal with size {N}")
+        scale = np.mean(np.sqrt(diagonal))
     else:
         # variance on diagonal
         diagonal = scale * np.random.normal(loc=1.0, scale=0.1, size=N)
@@ -50,7 +51,7 @@ def main():
     for _ in range(blobs):                    # number of blobs
         x = np.random.randint(0, N)
         y = np.random.randint(0, x)
-        amp = np.random.uniform(-scale, scale)
+        amp = np.random.uniform(-scale*filter_sigma*2, scale*filter_sigma*2)
         L[x, y] += amp
         if (amp < 0):
             print(f"Anticorrelation added at ({x}, {y}) with amplitude {amp:.3f}")
@@ -63,8 +64,14 @@ def main():
     L += np.random.normal(loc=0.0, scale=scale*filter_sigma*0.05, size=(N, N))
     # make it lower triangular
     L = np.tril(L)
-    # compute covariance matrix. This is positive definite and symmetric
+    # compute covariance matrix. This is positive definite and symmetric by definition
     M = L @ L.T
+
+    # check that M is positive definite
+    eigvals = np.linalg.eigvalsh(M)
+    print(f"Minimum eigenvalue of covariance matrix: {np.min(eigvals)}")
+    if np.any(eigvals <= 0):
+        raise ValueError("Covariance matrix is not positive definite!")
 
     # convert to TMatrixT<double> format and save to root file
     matrix = ROOT.TMatrixT('double')(N, N)
