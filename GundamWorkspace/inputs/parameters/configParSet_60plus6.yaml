@@ -76,4 +76,32 @@
           maxDialResponse: 100
           allowDialExtrapolation: true
 
-    -
+    - name: "Spline_mirror_q0"
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_mirror_q0"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
+
+    - name: "Spline_mirror_q3"
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_mirror_q3"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
+
+    - name: "Spline_bound_W"
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_bound_W"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
