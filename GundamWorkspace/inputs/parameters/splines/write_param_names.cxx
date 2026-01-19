@@ -40,9 +40,9 @@ int write_param_names(){
     1.0, // Prior for Spline_Enu
     1.0, // Prior for Spline_PP
     1.0, // Prior for Spline_FSIstrength
-    1.0, // Prior for Spline_mirror_q0
-    1.0, // Prior for Spline_mirror_q3
-    1.0, // Prior for Spline_bound_W
+    0.0, // Prior for Spline_mirror_q0
+    0.0, // Prior for Spline_mirror_q3
+    0.0, // Prior for Spline_bound_W
     // Add more priors as needed
   };
 
