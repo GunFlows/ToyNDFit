@@ -21,6 +21,7 @@ class NUISANCEEvent:
         self.pproton_threshold = 0.45  # GeV/c
         self.costhetaproton_threshold = 0.5
 
+
     def __repr__(self):
         keys = list(self.__dict__.keys())
         sample = ", ".join(f"{k}={getattr(self,k)!r}" for k in keys[:5])

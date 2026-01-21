@@ -3,6 +3,76 @@ from scipy.ndimage import gaussian_filter
 import ROOT
 import argparse
 
+
+def build_posdef_matrix(diagonal, filter_sigma=.9, blobs=6, seed=42) -> ROOT.TMatrixT:
+    """
+    Build a positive definite covariance matrix with localized correlations.
+
+    Parameters
+    ----------
+    diagonal : np.ndarray
+        1D array representing the diagonal elements (variances) of the covariance matrix.
+    filter_sigma : float
+        Sigma of Gaussian filter for smoothing.
+    blobs : int
+        Number of localized correlated blobs to add.
+    seed : int
+        Random seed for reproducibility.
+
+    Returns
+    -------
+    np.ndarray
+        Positive definite covariance matrix.
+    """
+    N = len(diagonal)
+    np.random.seed(seed)
+
+    L = np.diag(diagonal)
+    scale = 1 #np.mean(diagonal)
+
+    print(f"DEBUG: Building matrix of size {N}x{N} with diag elements: {diagonal}")
+
+    # add noise
+    L += np.random.normal(loc=0.0, scale=scale*filter_sigma*0.17, size=(N, N))
+    # add a few localized correlated blobs
+    for _ in range(blobs):                    # number of blobs
+        x = np.random.randint(0, N)
+        if (x==0):
+            y = 0
+        else:
+            y = np.random.randint(0, x)
+        amp = np.random.uniform(-scale*filter_sigma, scale*filter_sigma)
+        L[x, y] += amp
+        if (amp < 0):
+            print(f"Anticorrelation added at ({x}, {y}) with amplitude {amp:.3f}")
+        else:
+            print(f"Correlation added at ({x}, {y}) with amplitude {amp:.3f}")
+
+    # smooth to create correlations (tune sigma for correlation length)
+    L = gaussian_filter(L, sigma=filter_sigma)
+    # add back some noise so it’s not too smooth
+    L += np.random.normal(loc=0.0, scale=scale*filter_sigma*0.05, size=(N, N))
+    # make it lower triangular
+    L = np.tril(L)
+    # compute covariance matrix. This is positive definite and symmetric by definition
+    M = L @ L.T
+
+    # check that M is positive definite
+    eigvals = np.linalg.eigvalsh(M)
+    print(f"Minimum eigenvalue of covariance matrix: {np.min(eigvals)}")
+    if np.any(eigvals <= 0):
+        raise ValueError("Covariance matrix is not positive definite!")
+
+    # convert to TMatrixT<double> format and save to root file
+    matrix = ROOT.TMatrixT('double')(N, N)
+    for i in range(N):
+        for j in range(N):
+            matrix[i][j] = M[i, j]
+
+    return matrix # return the ROOT TMatrixT
+
+
+
 def main():
     p = argparse.ArgumentParser(
         description="Generate a prior covariance matrix with localized correlations and save it to a ROOT file."
@@ -34,56 +104,23 @@ def main():
         N = len(diagonal)
         # from sigma to variance
         diagonal = diagonal**2
-        L = np.diag(diagonal)
         print(f"Using provided diagonal with size {N}")
-        scale = np.mean(np.sqrt(diagonal))
     else:
         # variance on diagonal
-        diagonal = scale * np.random.normal(loc=1.0, scale=0.1, size=N)
+        diagonal = scale**2 * np.random.normal(loc=1.0, scale=0.1, size=N)
         for i, d in enumerate(diagonal):
             while d <= 0:
-                diagonal[i] = scale * np.random.normal(loc=1.0, scale=0.1, size=N)
-        L = np.diag(diagonal)
+                diagonal[i] = scale**2 * np.random.normal(loc=1.0, scale=0.1, size=N)
 
-    # add noise
-    L += np.random.normal(loc=0.0, scale=scale*filter_sigma*0.17, size=(N, N))
-    # add a few localized correlated blobs
-    for _ in range(blobs):                    # number of blobs
-        x = np.random.randint(0, N)
-        y = np.random.randint(0, x)
-        amp = np.random.uniform(-scale*filter_sigma*2, scale*filter_sigma*2)
-        L[x, y] += amp
-        if (amp < 0):
-            print(f"Anticorrelation added at ({x}, {y}) with amplitude {amp:.3f}")
-        else:
-            print(f"Correlation added at ({x}, {y}) with amplitude {amp:.3f}")
 
-    # smooth to create correlations (tune sigma for correlation length)
-    L = gaussian_filter(L, sigma=filter_sigma)
-    # add back some noise so it’s not too smooth
-    L += np.random.normal(loc=0.0, scale=scale*filter_sigma*0.05, size=(N, N))
-    # make it lower triangular
-    L = np.tril(L)
-    # compute covariance matrix. This is positive definite and symmetric by definition
-    M = L @ L.T
-
-    # check that M is positive definite
-    eigvals = np.linalg.eigvalsh(M)
-    print(f"Minimum eigenvalue of covariance matrix: {np.min(eigvals)}")
-    if np.any(eigvals <= 0):
-        raise ValueError("Covariance matrix is not positive definite!")
-
-    # convert to TMatrixT<double> format and save to root file
-    matrix = ROOT.TMatrixT('double')(N, N)
-    for i in range(N):
-        for j in range(N):
-            matrix[i][j] = M[i, j]
+    # build positive definite covariance matrix
+    matrix = build_posdef_matrix(diagonal, filter_sigma=filter_sigma, blobs=blobs, seed=seed)
 
     # compute correlation matrix for visualization
     corr_matrix = ROOT.TMatrixT('double')(N, N)
     for i in range(N):
         for j in range(N):
-            corr_matrix[i][j] = M[i, j] / np.sqrt(M[i, i] * M[j, j])
+            corr_matrix[i][j] = matrix[i, j] / np.sqrt(matrix[i, i] * matrix[j, j])
 
     # save matrix to png for visualization
     ROOT.gROOT.SetBatch(True)  # run in batch mode to avoid GUI
