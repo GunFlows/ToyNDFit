@@ -66,7 +66,7 @@
           maxDialResponse: 100
           allowDialExtrapolation: true
 
-    - name: "Spline_FSI" # enhances/depletes events as a function of FSI strength
+    - name: "Spline_FSIstrength" # enhances/depletes events as a function of FSI strength
       isEnabled: true
       dialSetDefinitions:
         - dialsType: Spline
