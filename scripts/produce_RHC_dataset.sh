@@ -3,7 +3,7 @@
 # throw an error if SOURCE_FOLDER is not set
 if [ -z "${SOURCE_FOLDER}" ]; then
   echo "Error: SOURCE_FOLDER is not set. Please run setup.sh."
-  exit 1
+  return 1
 fi
 
 executable=${SOURCE_FOLDER}/produce_dataset_from_NUISANCE.py
@@ -16,4 +16,6 @@ mkdir -p ${output_plots_dir}
 python ${executable} \
       --file_path ${input_nuisance_file} \
       --isFHC 0 \
-      --output_plots_dir ${output_plots_dir}
+      --output_plots_dir ${output_plots_dir} \
+      --ignore_cov_gen \
+      --config_spline ${BASE_FOLDER}/config/config_splines.yaml

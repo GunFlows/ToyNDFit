@@ -52,7 +52,7 @@ int write_param_names(){
     -999.0, // Lower bound for Spline_FSIstrength
     -999.0, // Lower bound for Spline_mirror_q0
     -999.0, // Lower bound for Spline_mirror_q3
-    -0.1, // Lower bound for Spline_bound_W
+    -999.0, // Lower bound for Spline_bound_W
     // Add more lower bounds as needed
   };
 
