@@ -15,7 +15,7 @@ module load apptainer 2>/dev/null || true
 export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-1}"
 
 BASE="/home/shares/sanchezf/gundam_n_flow/ToyNDFit_dev"
-HOST_OUT="${BASE}/outputs"
+HOST_OUT="${BASE}/GundamWorkspace/output"
 HOST_LOGS="${BASE}/logs"
 HOST_ANALYSIS="${BASE}/mcmc_analysis"
 
@@ -30,7 +30,7 @@ IN_ANALYSIS="/workspace/mcmc_analysis"
 mkdir -p "${HOST_LOGS}"
 mkdir -p "${HOST_ANALYSIS}/results"
 
-INPUT_HOST="${1:-${HOST_OUT}/toy_mcmc_6559585.root}"
+INPUT_HOST="${1:-${HOST_OUT}/gundamFitter_configToyOA_With_configMcmcToy_Asimov.root}"
 if [ ! -f "${INPUT_HOST}" ]; then
   echo "ERROR: input file not found: ${INPUT_HOST}"
   exit 1
@@ -57,9 +57,9 @@ srun --ntasks=1 apptainer exec \
     python3 -u '${IN_ANALYSIS}/analyze_mcmc.py' \
       --input '${IN_OUT}/$(basename "${INPUT_HOST}")' \
       --outdir '${IN_ANALYSIS}/results/job_${SLURM_JOB_ID}' \
-      --dims '19:25' \
+      --dims '20:25' \
       --thin 1 \
-      --burnin-frac 0.1 \
+      --burnin-frac 0.2 \
   "
 
 echo "Job ended at $(date)"

@@ -2,3 +2,5 @@ DATA/
 logs/
 outputs/
 mcmc_analysis/results/
+GundamWorkspace/datasets*
+GundamWorkspace/output

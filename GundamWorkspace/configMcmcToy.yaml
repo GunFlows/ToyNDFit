@@ -13,6 +13,6 @@ fitterEngineConfig:
     saveBurnin: false
 
     cycles: 5
-    steps: 10000
+    steps: 100000
     adaptiveRestore: none
 

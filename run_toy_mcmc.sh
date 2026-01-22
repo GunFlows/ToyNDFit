@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=gundam_mcmc_toy
-#SBATCH --partition=private-dpnc-cpu,shared-cpu
+#SBATCH --partition=private-dpnc-cpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=16G
-#SBATCH --time=08:00:00
+#SBATCH --time=72:00:00
 #SBATCH --output=/home/shares/sanchezf/gundam_n_flow/ToyNDFit_dev/logs/gundam_mcmc_%j.out
 #SBATCH --error=/home/shares/sanchezf/gundam_n_flow/ToyNDFit_dev/logs/gundam_mcmc_%j.err
 
@@ -33,7 +33,7 @@ IN_SETUP="${IN_GUNFLOWS}/setup_nosubshell.sh"
 BASE_CONFIG="configToyOA.yaml"
 MCMC_OVERRIDE="configMcmcToy.yaml"
 
-OUTROOT="toy_mcmc_${SLURM_JOB_ID}.root"
+OUTROOT="asimov_mcmc_${SLURM_JOB_ID}.root"
 
 EXTRA_ARGS=""
 if [ "$#" -gt 0 ]; then
@@ -58,7 +58,9 @@ srun --ntasks=1 apptainer exec \
     gundamFitter \
       -c '${IN_CONFIG}/${BASE_CONFIG}' \
       -of '${IN_CONFIG}/${MCMC_OVERRIDE}' \
-      --toy -t 10 \
+      -a \
+      # --toy \
+      -t 10 \
       -o '${IN_OUT}/${OUTROOT}' \
       ${EXTRA_ARGS} \
   "
