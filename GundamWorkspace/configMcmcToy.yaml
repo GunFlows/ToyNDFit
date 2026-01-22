@@ -1,0 +1,18 @@
+fitterEngineConfig:
+  minimizerConfig:
+    type: SimpleMcmc
+
+    checkParameterValidity: true
+    writeLlhHistory: true
+
+    algorithm: metropolis
+    proposal: adaptive   
+
+    burninCycles: 0
+    burninSteps: 10000
+    saveBurnin: false
+
+    cycles: 5
+    steps: 100000
+    adaptiveRestore: none
+
