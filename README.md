@@ -2,5 +2,5 @@
 
 
 Dependencies:
-uproot, ROOT, yaml, array
+uproot, ROOT, yaml, array, scipy.ndimage, numpy, argparse
 
