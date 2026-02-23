@@ -6,6 +6,9 @@ from spline_generator import SplineGenerator
 import ROOT
 import yaml
 from array import array
+import matplotlib.pyplot as plt
+from scipy import interpolate
+
 
 # Function to read the NUISANCE flat trees, smear the momenta based on a realistic momentum and angle resolution, and
 # generates a "GUNDAM dataset": basically a root file with a TTree containing FS kinematics.
@@ -121,13 +124,33 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
 
             Spline_obj = Spline_objects[name]
 
-            kin_val = getattr(event, kin_var)() if callable(getattr(event, kin_var, None)) else getattr(event, kin_var, None)
+            kin_val = getattr(event, kin_var)() if callable(getattr(event, kin_var, None)) else getattr(event, kin_var)
             if kin_val is None:
                 raise ValueError(f"Kinematic variable {kin_var} not found in NUISANCEEvent.")
             # print(f"Generating graph: {name} using {kin_var} = {kin_val}. Npts={npts}, range=({range_min}, {range_max}), prior={prior}")
             Spline_TGraph = Spline_obj.generate_graph(kin_val, kin_key=kin_var, n_points=npts, range_min=range_min, range_max=range_max)
             # append to the corresponding list
             Splines_lists[name].append(Spline_TGraph)
+            # Only for the first 10 events, draw the weight function and save it to a plot for checking (use matplotlib)
+            if i < 10:
+                x = np.array([Spline_TGraph.GetX()[j] for j in range(Spline_TGraph.GetN())])
+                y = np.array([Spline_TGraph.GetY()[j] for j in range(Spline_TGraph.GetN())])
+                plt.figure()
+                tck,u = interpolate.splprep([x, y], s=0, k=3)
+                unew = np.arange(0, 1.01, 0.01)
+                out = interpolate.splev(unew, tck)
+                t_k = 2*(kin_val-kmin)/(kmax-kmin) - 1 # transform kin_val to the [-1, 1] range expected by the spline function
+                plt.plot(x, y, marker='o', linestyle='None', label=f't(k) = {t_k:.2f}')
+                plt.plot(out[0], out[1])
+
+                plt.title(f"Parameter: {name}, Event {i}")
+                plt.xlabel("x")
+                plt.ylabel("w")
+                plt.legend()
+                plt.grid()
+                plt.savefig(os.path.join(out_dir, f"spline_{name}_event_{i}.png"))
+                plt.close()
+
 
 
         # fill lists!
@@ -311,8 +334,9 @@ if __name__ == "__main__":
         # get the first entry of the NUISANCEFile to check if the kin_variable exists
         f = NUISANCEFile(file_path, default_tree_name, relevant_keys=None, step=10000)
         event_test = next(iter(f))
-        if not hasattr(event_test, kin_var):
-                raise ValueError(f"Kinematic variable {kin_var} not found in NUISANCEEvent class.")
+        kin_val = getattr(event_test, kin_var)() if callable(getattr(event_test, kin_var, None)) else getattr(event_test, kin_var, None)
+        if kin_val is None:
+            raise ValueError(f"Kinematic variable {kin_var} not found in NUISANCEEvent.")
 
         print(f"{name}")
         print(f"  prior        = {prior}")

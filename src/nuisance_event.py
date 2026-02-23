@@ -9,7 +9,7 @@ class NUISANCEEvent:
         self.SelectedSample = -1  # Placeholder for SelectedSample attribute
 
         # muon acceptance
-        self.pmu_threshold = 0.0  # GeV/c
+        self.pmu_threshold = 0.01  # GeV/c
         self.costhetamu_threshold = 0.5
         # piplus acceptance
         self.ppiplus_threshold = 0.2  # GeV/c
@@ -65,6 +65,15 @@ class NUISANCEEvent:
         P = np.sqrt(Px[0]**2 + Py[0]**2 + Pz[0]**2)
         return Pz[0] / P
 
+    def magnitude_pmiss(self):
+        """Calculate the magnitude of missing momentum."""
+        px = self.pmiss.member("fX")
+        py = self.pmiss.member("fY")
+        pz = self.pmiss.member("fZ")
+        pmiss = np.linalg.norm([px, py, pz])
+        # Calculate components for debugging
+        return pmiss
+
     def isPP(self):
         """Return 1 if the event is a pion production event, 0 otherwise."""
         pdg = np.array(self.pdg)
@@ -83,6 +92,30 @@ class NUISANCEEvent:
         E = np.array(self.E)[pions_mask]
         total_E = np.sum(E)
         return total_E
+
+    def PNucleon_nuantinu(self):
+        """ Return outgoing nucleon momentum, make it negative if antineutrino"""
+        pdg = np.array(self.pdg)
+        nucleon_mask = (pdg == 2212) | (pdg == -2212)
+        if not np.any(nucleon_mask):
+            return 0.0
+        Px = np.array(self.px)[nucleon_mask]
+        Py = np.array(self.py)[nucleon_mask]
+        Pz = np.array(self.pz)[nucleon_mask]
+        if len(Px) > 1:
+            # If multiple nucleons, take leading nucleon
+            max_index = np.argmax(np.sqrt(Px**2 + Py**2 + Pz**2))
+            P = np.sqrt(Px[max_index]**2 + Py[max_index]**2 + Pz[max_index]**2)
+            if self.PDGnu == 14:  # Neutrino case
+                return P
+            else:  # Antineutrino case
+                return -P
+        else:
+            P = np.sqrt(Px[0]**2 + Py[0]**2 + Pz[0]**2)
+            if self.PDGnu == 14:  # Neutrino case
+                return P
+            else:  # Antineutrino case
+                return -P
 
     def FSI_strength(self):
         """Return the FSI strength of the event computed as energy of the escaping proton - energy of the proton at vertex."""

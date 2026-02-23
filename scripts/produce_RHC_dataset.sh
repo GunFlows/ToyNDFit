@@ -18,4 +18,4 @@ python ${executable} \
       --isFHC 0 \
       --output_plots_dir ${output_plots_dir} \
       --ignore_cov_gen \
-      --config_spline ${BASE_FOLDER}/config/config_splines.yaml
+      --config_spline ${BASE_FOLDER}/config/config_splines_100p10.yaml

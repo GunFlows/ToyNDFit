@@ -13,11 +13,13 @@ input_nuisance_file="${DATASET_FOLDER}/T2KND_FHC_numu_C8H8_NEUT580_1M_0000_NUISF
 output_plots_dir=${DATASET_FOLDER}/plots_FHC
 mkdir -p ${output_plots_dir}
 
+
+
 python ${executable} \
       --file_path ${input_nuisance_file} \
       --isFHC 1 \
       --output_plots_dir ${output_plots_dir} \
-      --config_spline ${BASE_FOLDER}/config/config_splines.yaml
+      --config_spline ${BASE_FOLDER}/config/config_splines_100p10.yaml
 
 
 #      --max_events 1000 \

@@ -1,0 +1,168 @@
+# Simple parameters file with only linear systematics (mimics flux and DetSyst pre-OA2024)
+
+# Each parameter represent a bin in true neutrino energy / flavor / FHC-RHC
+- name: "Linear Systematics"
+  isEnabled: true
+
+  # Fit Parameters Options:
+  allowPca: false # false by default
+  useEigenDecompInFit: true
+  #  maxEigenFraction: 0.99 # DON'T USE IT
+
+  # Allow fit parameters to be thrown before fit (default: true)
+  # Parameters Definition
+  covarianceMatrixFilePath: "./inputs/parameters/linear/lin60.root"
+  covarianceMatrixTMatrixD: "prior_covariance_matrix"
+  eigenParBounds:
+    minValue: -30
+    maxValue: 30
+  useOnlyOneParameterPerEvent: true
+  #atLeastOneDialPerEvent: true # TODO: IMPLEMENT?
+  dialSetDefinitions:
+    - applyOnDataSets: ["*"]
+      propagateResponseOn: [ "weight" ] # TODO: implement
+      parametersBinningPath: "./inputs/parameters/linear/Enu60Bins.txt"
+      printDialsSummary: true
+  printDialSetsSummary: true
+
+- name: "Detector Systematics"
+  isEnabled: true
+  # Fit Parameters Options:
+  allowPca: false # false by default
+  useEigenDecompInFit: true
+  covarianceMatrixFilePath: "./inputs/parameters/linear/prior_detector.root"
+  covarianceMatrixTMatrixD: "prior_covariance_matrix"
+  eigenParBounds:
+    minValue: -30
+    maxValue: 30
+  useOnlyOneParameterPerEvent: true
+  #atLeastOneDialPerEvent: true # TODO: IMPLEMENT?
+  dialSetDefinitions:
+    - applyOnDataSets: [ "*" ]
+      propagateResponseOn: [ "weight" ] # TODO: implement
+      parametersBinningPath: "./inputs/parameters/linear/PmuThetamuBins.txt"
+      printDialsSummary: true
+  printDialSetsSummary: true
+
+
+- name: "Non-Linear Systematics"
+  isEnabled: true
+
+  allowPca: false
+
+  covarianceMatrixFilePath: "./inputs/parameters/splines/spl10_with_names.root"
+
+  covarianceMatrixTMatrixD: prior_covariance_matrix
+  parameterNameTObjArray: param_names
+  parameterPriorTVectorD: priors
+  parameterLowerBoundsTVectorD: lower_bounds
+  parameterUpperBoundsTVectorD: upper_bounds
+  printDialSetsSummary: true
+
+#  # Toy throwing properties
+#  throwEnabledList: "xsec_param_throw"
+
+
+  parameterDefinitions:
+
+    - name: "Spline_Enu" # enhances/depletes events as a function of neutrino energy
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_Enu"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
+
+    - name: "Spline_PP" # enhances/depletes events with pion production as a function of pion total energy
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_PP"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
+
+    - name: "Spline_FSIstrength" # enhances/depletes events as a function of FSI strength
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_FSIstrength"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
+
+    - name: "Spline_mirror_q0"
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_mirror_q0"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
+
+    - name: "Spline_mirror_q3"
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_mirror_q3"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
+
+    - name: "Spline_bound_W"
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_bound_W"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
+
+    - name: "Spline_PB_nuantinu"
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_PB_nuantinu"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
+
+    - name: "Spline_Q2"
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_Q2"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
+
+    - name: "Spline_Emiss"
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_Emiss"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
+
+    - name: "Spline_pmiss"
+      isEnabled: true
+      dialSetDefinitions:
+        - dialsType: Spline
+          applyOnDataSets: [ "ND280" ]
+          dialLeafName: "Spline_pmiss"
+          minDialResponse: 0
+          maxDialResponse: 100
+          allowDialExtrapolation: true
+
+

@@ -29,7 +29,8 @@ Below are the inferred runtime and development requirements and recommended setu
 - matplotlib
 - uproot
 - tqdm
-- pyyaml
+
+[//]: # (- pyyaml)
 
 4) Environment variables and helper script
 - `setup.sh` defines project paths that several scripts expect. Source it before running the Python tools:
