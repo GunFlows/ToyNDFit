@@ -4,7 +4,7 @@ import ROOT
 import argparse
 
 
-def build_posdef_matrix(diagonal, filter_sigma=.9, blobs=6, seed=42) -> ROOT.TMatrixT:
+def build_posdef_matrix(diagonal, filter_sigma=.9, scale = 0.5, blobs=6, seed=42, no_noise=False) -> ROOT.TMatrixT:
     """
     Build a positive definite covariance matrix with localized correlations.
 
@@ -14,10 +14,14 @@ def build_posdef_matrix(diagonal, filter_sigma=.9, blobs=6, seed=42) -> ROOT.TMa
         1D array representing the diagonal elements (variances) of the covariance matrix.
     filter_sigma : float
         Sigma of Gaussian filter for smoothing.
+    scale : float
+        Scale of the correlations and the noise (if applicable)
     blobs : int
         Number of localized correlated blobs to add.
     seed : int
         Random seed for reproducibility.
+    no_noise : bool
+        If True, do not add random noise to the matrix.
 
     Returns
     -------
@@ -28,12 +32,13 @@ def build_posdef_matrix(diagonal, filter_sigma=.9, blobs=6, seed=42) -> ROOT.TMa
     np.random.seed(seed)
 
     L = np.diag(diagonal)
-    scale = 1 #np.mean(diagonal)
+
 
     print(f"DEBUG: Building matrix of size {N}x{N} with diag elements: {diagonal}")
 
     # add noise
-    L += np.random.normal(loc=0.0, scale=scale*filter_sigma*0.17, size=(N, N))
+    if (not no_noise):
+        L += np.random.normal(loc=0.0, scale=scale*0.03, size=(N, N))
     # add a few localized correlated blobs
     for _ in range(blobs):                    # number of blobs
         x = np.random.randint(0, N)
@@ -41,7 +46,7 @@ def build_posdef_matrix(diagonal, filter_sigma=.9, blobs=6, seed=42) -> ROOT.TMa
             y = 0
         else:
             y = np.random.randint(0, x)
-        amp = np.random.uniform(-scale*filter_sigma, scale*filter_sigma)
+        amp = np.random.uniform(-scale, scale)
         L[x, y] += amp
         if (amp < 0):
             print(f"Anticorrelation added at ({x}, {y}) with amplitude {amp:.3f}")
@@ -51,7 +56,8 @@ def build_posdef_matrix(diagonal, filter_sigma=.9, blobs=6, seed=42) -> ROOT.TMa
     # smooth to create correlations (tune sigma for correlation length)
     L = gaussian_filter(L, sigma=filter_sigma)
     # add back some noise so it’s not too smooth
-    L += np.random.normal(loc=0.0, scale=scale*filter_sigma*0.05, size=(N, N))
+    if (not no_noise):
+        L += np.random.normal(loc=0.0, scale=scale*0.01, size=(N, N))
     # make it lower triangular
     L = np.tril(L)
     # compute covariance matrix. This is positive definite and symmetric by definition

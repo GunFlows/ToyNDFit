@@ -10,8 +10,9 @@ from array import array
 
 if __name__ == "__main__":
 
-    p = argparse.ArgumentParser(description="Produce a GUNDAM input dataset from a NUISANCE flat tree.")
+    p = argparse.ArgumentParser(description="Produce a covariance matrix from a spline config.")
     p.add_argument("--config_spline", "-c", type=str, required=True, help="Path to the SPLINE configuration YAML file.")
+    p.add_argument("--no-noise", action="store_true", help="If set, the generated covariance matrix will not be smeared out.")
     args = p.parse_args()
 
     # load splines from config file
@@ -75,10 +76,11 @@ if __name__ == "__main__":
         filter_sigma = cfg.get("filter_sigma", 0.9)
         blobs = cfg.get("blobs", 6)
         seed = cfg.get("seed", 42)
+        scale_correlation = cfg.get("scale_correlation", 0.5)
         if len(sigmas) == 0:
             raise ValueError("No variances found for covariance matrix generation.")
         from generate_prior_matrix import build_posdef_matrix
-        cov_matrix = build_posdef_matrix(np.array(sigmas), filter_sigma=filter_sigma, blobs=blobs, seed=seed)
+        cov_matrix = build_posdef_matrix(np.array(sigmas), filter_sigma=filter_sigma, blobs=blobs, seed=seed, no_noise=args.no_noise, scale=scale_correlation)
         correl_matrix = ROOT.TMatrixT('double')(cov_matrix.GetNrows(), cov_matrix.GetNcols())
         for i in range(cov_matrix.GetNrows()):
             for j in range(cov_matrix.GetNcols()):

@@ -11,5 +11,5 @@ executable=${SOURCE_FOLDER}/produce_spline_covariance_matrix.py
 output_plots_dir=${DATASET_FOLDER}/plots_FHC
 mkdir -p ${output_plots_dir}
 
-python ${executable} --config_spline ${BASE_FOLDER}/config/config_splines.yaml
+python ${executable} --config_spline ${BASE_FOLDER}/config/config_splines_100p10.yaml --no-noise
 
