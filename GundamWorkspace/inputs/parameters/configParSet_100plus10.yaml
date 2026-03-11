@@ -16,7 +16,7 @@
   eigenParBounds:
     minValue: -30
     maxValue: 30
-  useOnlyOneParameterPerEvent: true
+      #useOnlyOneParameterPerEvent: true
   #atLeastOneDialPerEvent: true # TODO: IMPLEMENT?
   dialSetDefinitions:
     - applyOnDataSets: ["*"]
