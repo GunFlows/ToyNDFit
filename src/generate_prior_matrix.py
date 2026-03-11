@@ -90,6 +90,8 @@ def main():
     p.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
     p.add_argument("--filter", "-f", type=float, default=0.6, help="Sigma of Gaussian filter for smoothing")
     p.add_argument("--blobs", "-b", type=int, default=4, help="Number of localized correlated blobs to add")
+    p.add_argument("--no-noise", default=False, help="Do not add noise", action='store_true')
+
     args = p.parse_args()
 
     scale = args.scale
@@ -97,6 +99,8 @@ def main():
     seed = args.seed
     filter_sigma = args.filter
     blobs = args.blobs
+
+    no_noise = args.no_noise
 
     # matrix size
     N = args.size
@@ -113,14 +117,18 @@ def main():
         print(f"Using provided diagonal with size {N}")
     else:
         # variance on diagonal
-        diagonal = scale**2 * np.random.normal(loc=1.0, scale=0.1, size=N)
-        for i, d in enumerate(diagonal):
-            while d <= 0:
-                diagonal[i] = scale**2 * np.random.normal(loc=1.0, scale=0.1, size=N)
+        if no_noise:
+            diagonal = np.full(N, scale**2)
+        else:
+            diagonal = scale**2 * np.random.normal(loc=1.0, scale=0.1*scale, size=N)
+            # avoid negatives (although unlikely)
+            for i, d in enumerate(diagonal):
+                while d <= 0:
+                    diagonal[i] = scale**2 * np.random.normal(loc=1.0, scale=0.1*scale)
 
 
     # build positive definite covariance matrix
-    matrix = build_posdef_matrix(diagonal, filter_sigma=filter_sigma, blobs=blobs, seed=seed)
+    matrix = build_posdef_matrix(diagonal, filter_sigma=filter_sigma, blobs=blobs, seed=seed, no_noise=no_noise)
 
     # compute correlation matrix for visualization
     corr_matrix = ROOT.TMatrixT('double')(N, N)
