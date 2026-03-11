@@ -30,7 +30,7 @@
   # Fit Parameters Options:
   allowPca: false # false by default
   useEigenDecompInFit: true
-  covarianceMatrixFilePath: "./inputs/parameters/linear/detector_prior.root"
+  covarianceMatrixFilePath: "./inputs/parameters/linear/det_prior40corr.root"
   covarianceMatrixTMatrixD: "prior_covariance_matrix"
   eigenParBounds:
     minValue: -30
