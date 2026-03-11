@@ -112,19 +112,17 @@ def main():
     if args.diagonal:
         diagonal = np.loadtxt(args.diagonal)
         N = len(diagonal)
-        # from sigma to variance
-        diagonal = diagonal**2
         print(f"Using provided diagonal with size {N}")
     else:
         # variance on diagonal
         if no_noise:
-            diagonal = np.full(N, scale**2)
+            diagonal = np.full(N, scale)
         else:
-            diagonal = scale**2 * np.random.normal(loc=1.0, scale=0.1*scale, size=N)
+            diagonal = scale * np.random.normal(loc=1.0, scale=0.1*scale, size=N)
             # avoid negatives (although unlikely)
             for i, d in enumerate(diagonal):
                 while d <= 0:
-                    diagonal[i] = scale**2 * np.random.normal(loc=1.0, scale=0.1*scale)
+                    diagonal[i] = scale * np.random.normal(loc=1.0, scale=0.1*scale)
 
 
     # build positive definite covariance matrix
