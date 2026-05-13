@@ -100,6 +100,7 @@
       dialSetDefinitions:
         - dialsType: Spline
           applyOnDataSets: [ "ND280" ]
+#          dialLeafName: "Spline_q0"
           dialLeafName: "Spline_mirror_q0"
           minDialResponse: 0
           maxDialResponse: 100
@@ -110,6 +111,7 @@
       dialSetDefinitions:
         - dialsType: Spline
           applyOnDataSets: [ "ND280" ]
+#          dialLeafName: "Spline_q3"
           dialLeafName: "Spline_mirror_q3"
           minDialResponse: 0
           maxDialResponse: 100

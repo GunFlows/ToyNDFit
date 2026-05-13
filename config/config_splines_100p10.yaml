@@ -70,13 +70,13 @@ splines:
   - name: "Spline_mirror_q0"
     prior: 1.0
     sigma: 0.1
-    type: "mirrored"
+    type: "polynomial"
     power: 1
     graph_points: 20
     kin_variable: "q0"
     kin_min: 0.0
     kin_max: 0.5
-    importance: 0.1
+    importance: 0.05
     range_min: 0.7
     range_max: 1.3
     lower_bound: -999.0 # dial limit for Gundam fit
@@ -86,7 +86,7 @@ splines:
   - name: "Spline_mirror_q3"
     prior: 1.0
     sigma: 0.1
-    type: "mirrored"
+    type: "polynomial"
     power: 3
     graph_points: 20
     kin_variable: "q3"
@@ -108,7 +108,7 @@ splines:
     kin_variable: "W"
     kin_min: 0.0
     kin_max: 1.5
-    importance: 0.3
+    importance: 0.1
     range_min: 0.7
     range_max: 1.3
     lower_bound: -999.0 # dial limit for Gundam fit

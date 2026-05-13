@@ -20,7 +20,7 @@ from scipy import interpolate
 
 
 
-def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_name="FlatTree_VARS", splines_dict = None):
+def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_name="FlatTree_VARS", splines_dict = None, is_data = False):
     """
     Read a NUISANCE flat tree and return a list of NUISANCEEvent objects.
     This is just a test function!
@@ -37,7 +37,8 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         Maximum number of events to process. Default is -1 (all events).
     splines_dict : dict
         Dictionary containing the spline configurations.
-
+    is_data : bool
+        If True, the function creates a "data" dataset, with no splines nor true info.
     Returns
     -------
     dictionary : dict
@@ -57,7 +58,7 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
     f = NUISANCEFile(file_path, tree_name, relevant_keys=None, step=10000)
     num_entries = len(f)
     if (max_events < 0):
-        max_events = num_entries
+        max_events = num_entries/2.
 
     # OUTPUT BRANCHES LISTS
     SelectedSample_list = []
@@ -67,35 +68,39 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
     TrueCosThetamu_list = []
     Reaction_list = []
     Enu_list = []
-    # initialize an empty list for each of the splines in the configuration dictionary
     Splines_lists = {}
-    for item in splines_dict:
-        name = item["name"]
-        Splines_lists[name] = []
-
-    # Generate splines according to the configuration dictionary
     Spline_objects = {}
-    for item in splines_dict:
-        name = item["name"]
-        kind = item["type"]
-        power = item["power"]
-        prior = item["prior"]
-        kin_var = item["kin_variable"]
-        kmin = item["kin_min"]
-        kmax = item["kin_max"]
-        imp = item["importance"]
-        mirror_point = item.get("mirror_point", None)
 
-        Spline_objects[name] = SplineGenerator(spline_type=kind, prior=prior, power=power, range_width=imp, kin_min=kmin, kin_max=kmax, mirror_point=mirror_point)
+    if not is_data:
+        # initialize an empty list for each of the splines in the configuration dictionary
+        for item in splines_dict:
+            name = item["name"]
+            Splines_lists[name] = []
+        # Generate splines according to the configuration dictionary
+        for item in splines_dict:
+            name = item["name"]
+            kind = item["type"]
+            power = item["power"]
+            prior = item["prior"]
+            kin_var = item["kin_variable"]
+            kmin = item["kin_min"]
+            kmax = item["kin_max"]
+            imp = item["importance"]
+            mirror_point = item.get("mirror_point", None)
+
+            Spline_objects[name] = SplineGenerator(spline_type=kind, prior=prior, power=power, range_width=imp, kin_min=kmin, kin_max=kmax, mirror_point=mirror_point)
 
 
     pbar = tqdm(total=max_events)
     for i, event in enumerate(f):
-        # limit number of events for testing
-        if i > max_events and max_events > 0:
+        # Select the number of events. in "data" tree simulation, we start from the end, to have different events in the two trees.
+        if (not is_data) and (i > max_events):
             break
+        if is_data and (i < num_entries - max_events):
+            continue
         # progress bar
-        if (i + 1) % (max_events // 50) == 0:
+        indicator_index = i if not is_data else (i - (num_entries - max_events))
+        if (indicator_index + 1) % (max_events // 50) == 0:
             pbar.update(max_events // 50)
         # Perform selection
         sample = event.PerformSelection(isFHC)
@@ -107,49 +112,50 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         # smear Pmu, CosThetamu
         Pmu_smeared, CosThetamu_smeared = smear(Pmu, CosThetamu, pmu_map, cthetamap)
 
-        # is pion production event?
-        isPP = event.isPP()
-        pion_energy = event.total_pion_energy() if isPP else 0.0
+        if not is_data:
+            # is pion production event?
+            isPP = event.isPP()
+            pion_energy = event.total_pion_energy() if isPP else 0.0
 
-        # generate splines graphs
-        for item in splines_dict:
-            name = item["name"]
-            kin_var = item["kin_variable"]
-            npts = item.get("graph_points", 10)
-            kmin = item.get("kin_min", 0.5)
-            kmax = item.get("kin_max", 1.5)
-            range_min = item.get("range_min", 0.5)
-            range_max = item.get("range_max", 1.5)
-            prior = item["prior"] # just to check that the prior has w=1 and it's in the dial range
+            # generate splines graphs
+            for item in splines_dict:
+                name = item["name"]
+                kin_var = item["kin_variable"]
+                npts = item.get("graph_points", 10)
+                kmin = item.get("kin_min", 0.5)
+                kmax = item.get("kin_max", 1.5)
+                range_min = item.get("range_min", 0.5)
+                range_max = item.get("range_max", 1.5)
+                prior = item["prior"] # just to check that the prior has w=1 and it's in the dial range
 
-            Spline_obj = Spline_objects[name]
+                Spline_obj = Spline_objects[name]
 
-            kin_val = getattr(event, kin_var)() if callable(getattr(event, kin_var, None)) else getattr(event, kin_var)
-            if kin_val is None:
-                raise ValueError(f"Kinematic variable {kin_var} not found in NUISANCEEvent.")
-            # print(f"Generating graph: {name} using {kin_var} = {kin_val}. Npts={npts}, range=({range_min}, {range_max}), prior={prior}")
-            Spline_TGraph = Spline_obj.generate_graph(kin_val, kin_key=kin_var, n_points=npts, range_min=range_min, range_max=range_max)
-            # append to the corresponding list
-            Splines_lists[name].append(Spline_TGraph)
-            # Only for the first 10 events, draw the weight function and save it to a plot for checking (use matplotlib)
-            if i < 10:
-                x = np.array([Spline_TGraph.GetX()[j] for j in range(Spline_TGraph.GetN())])
-                y = np.array([Spline_TGraph.GetY()[j] for j in range(Spline_TGraph.GetN())])
-                plt.figure()
-                tck,u = interpolate.splprep([x, y], s=0, k=3)
-                unew = np.arange(0, 1.01, 0.01)
-                out = interpolate.splev(unew, tck)
-                t_k = 2*(kin_val-kmin)/(kmax-kmin) - 1 # transform kin_val to the [-1, 1] range expected by the spline function
-                plt.plot(x, y, marker='o', linestyle='None', label=f't(k) = {t_k:.2f}')
-                plt.plot(out[0], out[1])
+                kin_val = getattr(event, kin_var)() if callable(getattr(event, kin_var, None)) else getattr(event, kin_var)
+                if kin_val is None:
+                    raise ValueError(f"Kinematic variable {kin_var} not found in NUISANCEEvent.")
+                # print(f"Generating graph: {name} using {kin_var} = {kin_val}. Npts={npts}, range=({range_min}, {range_max}), prior={prior}")
+                Spline_TGraph = Spline_obj.generate_graph(kin_val, kin_key=kin_var, n_points=npts, range_min=range_min, range_max=range_max)
+                # append to the corresponding list
+                Splines_lists[name].append(Spline_TGraph)
+                # Only for the first 10 events, draw the weight function and save it to a plot for checking (use matplotlib)
+                if i < 10:
+                    x = np.array([Spline_TGraph.GetX()[j] for j in range(Spline_TGraph.GetN())])
+                    y = np.array([Spline_TGraph.GetY()[j] for j in range(Spline_TGraph.GetN())])
+                    plt.figure()
+                    tck,u = interpolate.splprep([x, y], s=0, k=3)
+                    unew = np.arange(0, 1.01, 0.01)
+                    out = interpolate.splev(unew, tck)
+                    t_k = 2*(kin_val-kmin)/(kmax-kmin) - 1 # transform kin_val to the [-1, 1] range expected by the spline function
+                    plt.plot(x, y, marker='o', linestyle='None', label=f't(k) = {t_k:.2f}')
+                    plt.plot(out[0], out[1])
 
-                plt.title(f"Parameter: {name}, Event {i}")
-                plt.xlabel("x")
-                plt.ylabel("w")
-                plt.legend()
-                plt.grid()
-                plt.savefig(os.path.join(out_dir, f"spline_{name}_event_{i}.png"))
-                plt.close()
+                    plt.title(f"Parameter: {name}, Event {i}")
+                    plt.xlabel("x")
+                    plt.ylabel("w")
+                    plt.legend()
+                    plt.grid()
+                    plt.savefig(os.path.join(out_dir, f"spline_{name}_event_{i}.png"))
+                    plt.close()
 
 
 
@@ -157,10 +163,11 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         SelectedSample_list.append(sample)
         Pmu_list.append(Pmu_smeared)
         CosThetamu_list.append(CosThetamu_smeared)
-        TruePmu_list.append(Pmu)
-        TrueCosThetamu_list.append(CosThetamu)
-        Reaction_list.append(event.Mode)
-        Enu_list.append(Enu)
+        if not is_data:
+            TruePmu_list.append(Pmu)
+            TrueCosThetamu_list.append(CosThetamu)
+            Reaction_list.append(event.Mode)
+            Enu_list.append(Enu)
 
 
     pbar.close()
@@ -175,30 +182,40 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
     # isRHC branch
     isRHC_list = [0 if isFHC else 1] * len(SelectedSample_list)
 
-    dictionary = {
-        "SelectedSample": to_1d_numpy(SelectedSample_list, dtype=np.int32, int_fill=-1),
-        "Pmu": to_1d_numpy(Pmu_list, dtype=np.float32, float_fill=-999.0),
-        "CosThetamu": to_1d_numpy(CosThetamu_list, dtype=np.float32, float_fill=-999.0),
-        "TruePmu": to_1d_numpy(TruePmu_list, dtype=np.float32, float_fill=-999.0),
-        "TrueCosThetamu": to_1d_numpy(TrueCosThetamu_list, dtype=np.float32, float_fill=-999.0),
-        "Reaction": to_1d_numpy(Reaction_list, dtype=np.int32, int_fill=-999),
-        "Enu": to_1d_numpy(Enu_list, dtype=np.float32, float_fill=-999.0),
-        "weight": to_1d_numpy(weights_list, dtype=np.float32, float_fill=1.0),
-        "isRHC": to_1d_numpy(isRHC_list, dtype=np.int32, int_fill=0),
-    }
-    # append to dictionary the splines lists (special handling for TGraph branches)
-    for name, spline_list in Splines_lists.items():
-        dictionary.update({ name: to_1d_numpy(spline_list, dtype=ROOT.TGraph, int_fill=None) })
-        print(f"Added spline branch with: {name}, filled with {len(spline_list)} TGraphs. TGraph name: {spline_list[0].GetName() if len(spline_list) > 0 else 'N/A'}")
+
+    if not is_data:
+        dictionary = {
+            "SelectedSample": to_1d_numpy(SelectedSample_list, dtype=np.int32, int_fill=-1),
+            "Pmu": to_1d_numpy(Pmu_list, dtype=np.float32, float_fill=-999.0),
+            "CosThetamu": to_1d_numpy(CosThetamu_list, dtype=np.float32, float_fill=-999.0),
+            "TruePmu": to_1d_numpy(TruePmu_list, dtype=np.float32, float_fill=-999.0),
+            "TrueCosThetamu": to_1d_numpy(TrueCosThetamu_list, dtype=np.float32, float_fill=-999.0),
+            "Reaction": to_1d_numpy(Reaction_list, dtype=np.int32, int_fill=-999),
+            "Enu": to_1d_numpy(Enu_list, dtype=np.float32, float_fill=-999.0),
+            "weight": to_1d_numpy(weights_list, dtype=np.float32, float_fill=1.0),
+            "isRHC": to_1d_numpy(isRHC_list, dtype=np.int32, int_fill=0),
+        }
+        # append to dictionary the splines lists (special handling for TGraph branches)
+        for name, spline_list in Splines_lists.items():
+            dictionary.update({ name: to_1d_numpy(spline_list, dtype=ROOT.TGraph, int_fill=None) })
+            print(f"Added spline branch with: {name}, filled with {len(spline_list)} TGraphs. TGraph name: {spline_list[0].GetName() if len(spline_list) > 0 else 'N/A'}")
 
 
 
-        # "Spline_Enu": to_1d_numpy(Spline_Enu_list, dtype=ROOT.TGraph, int_fill=None),
-        # "Spline_PP": to_1d_numpy(Spline_PP_list, dtype=ROOT.TGraph, int_fill=None),
-        # "Spline_FSIstrength": to_1d_numpy(Spline_FSIstrength_list, dtype=ROOT.TGraph, int_fill=None),
-        # "Spline_mirror_q0": to_1d_numpy(Spline_mirror_q0_list, dtype=ROOT.TGraph, int_fill=None),
-        # "Spline_mirror_q3": to_1d_numpy(Spline_mirror_q3_list, dtype=ROOT.TGraph, int_fill=None),
-        # "Spline_bound_W": to_1d_numpy(Spline_bound_W_list, dtype=ROOT.TGraph, int_fill=None),
+            # "Spline_Enu": to_1d_numpy(Spline_Enu_list, dtype=ROOT.TGraph, int_fill=None),
+            # "Spline_PP": to_1d_numpy(Spline_PP_list, dtype=ROOT.TGraph, int_fill=None),
+            # "Spline_FSIstrength": to_1d_numpy(Spline_FSIstrength_list, dtype=ROOT.TGraph, int_fill=None),
+            # "Spline_mirror_q0": to_1d_numpy(Spline_mirror_q0_list, dtype=ROOT.TGraph, int_fill=None),
+            # "Spline_mirror_q3": to_1d_numpy(Spline_mirror_q3_list, dtype=ROOT.TGraph, int_fill=None),
+            # "Spline_bound_W": to_1d_numpy(Spline_bound_W_list, dtype=ROOT.TGraph, int_fill=None),
+    else:
+        dictionary = {
+            "SelectedSample": to_1d_numpy(SelectedSample_list, dtype=np.int32, int_fill=-1),
+            "Pmu": to_1d_numpy(Pmu_list, dtype=np.float32, float_fill=-999.0),
+            "CosThetamu": to_1d_numpy(CosThetamu_list, dtype=np.float32, float_fill=-999.0),
+            "isRHC": to_1d_numpy(isRHC_list, dtype=np.int32, int_fill=0),
+        }
+
 
 
 
@@ -286,6 +303,9 @@ if __name__ == "__main__":
     p.add_argument("--output_plots_dir", type=str, default="./plots", help="Directory to save output plots. Default is ./plots")
     p.add_argument("--config_spline", "-c", required=True, type=str, help="Path to the SPLINE configuration YAML file.")
     p.add_argument("--ignore_cov_gen", action="store_true", help="If set, ignore the generate_cov_matrix option in the config file.")
+    p.add_argument("--output_root_file_mc", type=str, required=True, help="Path to the output ROOT file for the MC dataset.")
+    p.add_argument("--output_root_file_data", type=str, required=True, help="Path to the output ROOT file for the DATA dataset.")
+
     args = p.parse_args()
 
     isFHC = args.isFHC
@@ -369,20 +389,25 @@ if __name__ == "__main__":
 
     print(f"Processing file: {file_path},\nisFHC={isFHC},\nmax_events={max_events},\nPlots will be saved to: {out_dir}")
 
-    data = make_dataset_from_nuisance(file_path, isFHC, max_events=max_events, splines_dict=splines_dictionary, tree_name=default_tree_name)
+    mc = make_dataset_from_nuisance(file_path, isFHC, max_events=max_events/2, splines_dict=splines_dictionary, tree_name=default_tree_name)
+    data = make_dataset_from_nuisance(file_path, isFHC, is_data= True, max_events=max_events/2, tree_name=default_tree_name)
 
     # create plots (unpack lists from dictionary)
-    SelectedSample_list = data["SelectedSample"]
-    Pmu_list = data["Pmu"]
-    CosThetamu_list = data["CosThetamu"]
-    Reaction_list = data["Reaction"]
+    SelectedSample_list = mc["SelectedSample"]
+    Pmu_list = mc["Pmu"]
+    CosThetamu_list = mc["CosThetamu"]
+    Reaction_list = mc["Reaction"]
     plot_utils.plot_samples(SelectedSample_list, Pmu_list, CosThetamu_list, Reaction_list, out_dir=out_dir)
 
-    output_root_file = file_path.replace("_NUISFLAT.root", "_GUNDAMINPUT.root")
-    write_dictionary_to_tree(data, output_root_file)
+    output_root_file_mc = args.output_root_file_mc
+    write_dictionary_to_tree(mc, output_root_file_mc)
+
+    output_root_file_data = args.output_root_file_data
+    write_dictionary_to_tree(data, output_root_file_data)
+
 
     generate_cov = generate_cov and (not ignore_cov)
-    # Generate covariance matrix if requested
+    # Finally, generate covariance matrix if requested
     if generate_cov:
         print(f"Generating covariance matrix for the splined parameters...")
         filter_sigma = cfg.get("filter_sigma", 0.9)
@@ -423,6 +448,7 @@ if __name__ == "__main__":
         outfile_cov.WriteObject(upper_bounds, "upper_bounds")
 
         print(f"Saved covariance matrix and metadata to {cov_out_file_name}")
+
 
 
 
