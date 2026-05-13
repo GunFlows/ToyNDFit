@@ -1,0 +1,69 @@
+#########################################
+# OA 2021 inputs for ND fit WITH OP AND PB 0 PRIORS
+#########################################
+
+outputFolder: "./output"
+minGundamVersion: 1.8.0
+
+
+fitterEngineConfig:
+
+
+  # 1.9.1+ feature
+  pcaMethod: DeltaChi2Threshold
+  pcaThreshold: 1
+
+#  pcaMethod: ReducedDeltaChi2Threshold
+#  pcaThreshold: 2E-5
+
+#  pcaMethod: SqrtReducedDeltaChi2Threshold
+#  pcaThreshold: 5E-3
+
+
+#   Apply gain on the determination of the step size for the fitter
+#    scaleParStepWithChi2Response: true # default :false. use 1 sigma instead
+#    parStepGain: 0.1
+
+  # Throw (correlated) parameters before making the fit
+  # This helps Minuit converge while doing an Asimov fit when too many fit parameters are involved
+  # Pushing the parameter away from the minimum allow Minuit to better scan the area
+  throwMcBeforeFit: false
+  # Some fit parameter may have huge prior, no need to push everybody at 1sigma in average
+  # ThrowPar = ParPrior +  throwMcBeforeFitGain * randomGaus(0, 1sigma)
+  throwMcBeforeFitGain: 0.1
+
+  # Generate figures of the samples prefit/postfit using plotGeneratorConfig
+  generateSamplePlots: true
+
+  # Monitor path to go from prefit to postfit
+  enablePreFitToPostFitLineScan: true # true by default
+
+  # sigma variations
+  enableParamVariations: false
+  paramVariationsSigmas: [ -3, -1, 0, 1, 3 ]
+
+  minimizerConfig: "./inputs/fitter/configMinimizer.yaml"
+
+  likelihoodInterfaceConfig:
+    propagatorConfig:
+
+      showEventBreakdown: true # default: true
+      showEventBreakdownBeforePrior: true # default: false
+      throwParameters: false
+
+      # For the p-Values / pull studies
+      reThrowParSetIfOutOfBounds: true
+
+      # debug options
+      debugPrintLoadedEvents: true
+      debugPrintLoadedEventsNbPerSample: 10
+      devSingleThreadReweight: false
+      devSingleThreadHistFill: false
+
+      parameterSetListConfig: "./inputs/parameters/configParSet_60plus10.yaml"
+      dataSetList:            "./inputs/datasets/configDatasets.yaml"
+      fitSampleSetConfig:     "./inputs/samples/configSamples.yaml"
+      eventTreeWriter:        "./inputs/output/configEventTreeWriter.yaml"
+      plotGeneratorConfig:    "./inputs/output/configPlotGenerator.yaml"
+
+
