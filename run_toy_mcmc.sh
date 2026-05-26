@@ -3,24 +3,24 @@
 #SBATCH --partition=private-dpnc-cpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=20
 #SBATCH --mem-per-cpu=16G
-#SBATCH --time=72:00:00
-#SBATCH --output=/home/shares/sanchezf/gundam_n_flow/ToyNDFit_dev/logs/gundam_mcmc_%j.out
-#SBATCH --error=/home/shares/sanchezf/gundam_n_flow/ToyNDFit_dev/logs/gundam_mcmc_%j.err
+#SBATCH --time=168:00:00
+#SBATCH --output=/home/shares/sanchezf/gundam_n_flow/common_gundam_workspace/logs/gundam_mcmc_%j.out
+#SBATCH --error=/home/shares/sanchezf/gundam_n_flow/common_gundam_workspace/logs/gundam_mcmc_%j.err
 
 set -euo pipefail
 
 module load apptainer 2>/dev/null || true
 export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-1}"
 
-BASE="/home/shares/sanchezf/gundam_n_flow/ToyNDFit_dev"
+BASE="/home/shares/sanchezf/gundam_n_flow/common_gundam_workspace"
 HOST_CONFIG="${BASE}/GundamWorkspace"
 HOST_DATA="${BASE}/DATA"
-HOST_OUT="${BASE}/outputs"
+HOST_OUT="${BASE}/output"
 HOST_LOGS="${BASE}/logs"
 
-HOST_GUNFLOWS="/home/shares/sanchezf/gundam_n_flow/GuNFlows"
+HOST_GUNFLOWS="/home/shares/sanchezf/gundam_n_flow/GuNFlows_dev"
 SIF="/home/shares/sanchezf/gundam_n_flow/GuNFlows/env/containers/ml_image2.sif"
 
 IN_CONFIG="/workspace/config"
@@ -30,10 +30,10 @@ IN_OUT="/workspace/output"
 IN_GUNFLOWS="/workspace/work/GuNFlows"
 IN_SETUP="${IN_GUNFLOWS}/setup_nosubshell.sh"
 
-BASE_CONFIG="configToyOA.yaml"
+BASE_CONFIG="configToyOA_100plus10.yaml"
 MCMC_OVERRIDE="configMcmcToy.yaml"
 
-OUTROOT="asimov_mcmc_${SLURM_JOB_ID}.root"
+OUTROOT="gundamMcmc_100p10_FakeDataNoMirror${SLURM_JOB_ID}.root"
 
 EXTRA_ARGS=""
 if [ "$#" -gt 0 ]; then
@@ -59,8 +59,7 @@ srun --ntasks=1 apptainer exec \
       -c '${IN_CONFIG}/${BASE_CONFIG}' \
       -of '${IN_CONFIG}/${MCMC_OVERRIDE}' \
       -a \
-      # --toy \
-      -t 10 \
+      -t 16 \
       -o '${IN_OUT}/${OUTROOT}' \
       ${EXTRA_ARGS} \
   "
