@@ -4,7 +4,7 @@ import ROOT
 import argparse
 
 
-def build_posdef_matrix(diagonal, filter_sigma=.9, scale = 0.5, blobs=6, seed=42, no_noise=False) -> ROOT.TMatrixT:
+def build_posdef_matrix(diagonal, filter_sigma=.9, scale = 0.5, blobs=6, seed=42, no_noise=False, symmetric_blobs=False) -> ROOT.TMatrixT:
     """
     Build a positive definite covariance matrix with localized correlations.
 
@@ -22,6 +22,12 @@ def build_posdef_matrix(diagonal, filter_sigma=.9, scale = 0.5, blobs=6, seed=42
         Random seed for reproducibility.
     no_noise : bool
         If True, do not add random noise to the matrix.
+    symmetric_blobs : bool
+        If True, force alternating sign on blob amplitudes (sign flips every blob)
+        and bias magnitudes toward [scale/2, scale]. This breaks the bias toward
+        a strongly aligned dominant eigenvector, so the resulting covariance has
+        eigenmodes with mixed-sign components (low alignment), suppressing the
+        correlation-driven marginal-peak-shift effect.
 
     Returns
     -------
@@ -40,13 +46,18 @@ def build_posdef_matrix(diagonal, filter_sigma=.9, scale = 0.5, blobs=6, seed=42
     if (not no_noise):
         L += np.random.normal(loc=0.0, scale=scale*0.03, size=(N, N))
     # add a few localized correlated blobs
-    for _ in range(blobs):                    # number of blobs
+    for i in range(blobs):                    # number of blobs
         x = np.random.randint(0, N)
         if (x==0):
             y = 0
         else:
             y = np.random.randint(0, x)
-        amp = np.random.uniform(-scale, scale)
+        if symmetric_blobs:
+            # Alternate sign blob-by-blob; magnitude in [scale/2, scale]
+            sign = 1.0 if (i % 2 == 0) else -1.0
+            amp = sign * np.random.uniform(0.5 * scale, scale)
+        else:
+            amp = np.random.uniform(-scale, scale)
         L[x, y] += amp
         if (amp < 0):
             print(f"Anticorrelation added at ({x}, {y}) with amplitude {amp:.3f}")
@@ -91,6 +102,8 @@ def main():
     p.add_argument("--filter", "-f", type=float, default=0.6, help="Sigma of Gaussian filter for smoothing")
     p.add_argument("--blobs", "-b", type=int, default=4, help="Number of localized correlated blobs to add")
     p.add_argument("--no-noise", default=False, help="Do not add noise", action='store_true')
+    p.add_argument("--symmetric-blobs", default=False, action='store_true',
+                   help="Force alternating sign on blob amplitudes so the resulting covariance has eigenvectors with mixed-sign components (low alignment).")
 
     args = p.parse_args()
 
@@ -101,6 +114,7 @@ def main():
     blobs = args.blobs
 
     no_noise = args.no_noise
+    symmetric_blobs = args.symmetric_blobs
 
     # matrix size
     N = args.size
@@ -126,7 +140,7 @@ def main():
 
 
     # build positive definite covariance matrix
-    matrix = build_posdef_matrix(diagonal, filter_sigma=filter_sigma, blobs=blobs, seed=seed, no_noise=no_noise)
+    matrix = build_posdef_matrix(diagonal, filter_sigma=filter_sigma, scale=scale, blobs=blobs, seed=seed, no_noise=no_noise, symmetric_blobs=symmetric_blobs)
 
     # compute correlation matrix for visualization
     corr_matrix = ROOT.TMatrixT('double')(N, N)

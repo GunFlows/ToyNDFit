@@ -23,4 +23,4 @@ python ${executable} \
       --config_spline ${BASE_FOLDER}/config/config_splines_100p10.yaml \
       --output_root_file_mc ${output_mc_file} \
       --output_root_file_data ${output_data_file} \
-#      --max_events 1000 \
+      --max_events 1000000 \

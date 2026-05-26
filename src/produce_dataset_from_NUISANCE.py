@@ -389,8 +389,11 @@ if __name__ == "__main__":
 
     print(f"Processing file: {file_path},\nisFHC={isFHC},\nmax_events={max_events},\nPlots will be saved to: {out_dir}")
 
-    mc = make_dataset_from_nuisance(file_path, isFHC, max_events=max_events/2, splines_dict=splines_dictionary, tree_name=default_tree_name)
-    data = make_dataset_from_nuisance(file_path, isFHC, is_data= True, max_events=max_events/2, tree_name=default_tree_name)
+    POTratio = 0.6 # POT_data / POT_MC
+    print (f"Producing MC dataset with {int(max_events/2.)} events.")
+    mc = make_dataset_from_nuisance(file_path, isFHC, max_events=int(max_events/2.), splines_dict=splines_dictionary, tree_name=default_tree_name)
+    print (f"Producing DATA dataset with {int(max_events/2.*POTratio)} events.")
+    data = make_dataset_from_nuisance(file_path, isFHC, is_data= True, max_events=int(max_events/2.*POTratio), tree_name=default_tree_name)
 
     # create plots (unpack lists from dictionary)
     SelectedSample_list = mc["SelectedSample"]
