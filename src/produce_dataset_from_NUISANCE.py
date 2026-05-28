@@ -1,4 +1,3 @@
-
 from utils import *
 import plot_utils
 import argparse
@@ -70,12 +69,20 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
     Enu_list = []
     Splines_lists = {}
     Spline_objects = {}
+    spline_types = {}
+    spline_graph_meta = {}
 
     if not is_data:
         # initialize an empty list for each of the splines in the configuration dictionary
         for item in splines_dict:
             name = item["name"]
             Splines_lists[name] = []
+            spline_types[name] = item.get("type", "polynomial")
+            spline_graph_meta[name] = {
+                "npts": item.get("graph_points", 10),
+                "range_min": item.get("range_min", 0.5),
+                "range_max": item.get("range_max", 1.5),
+            }
         # Generate splines according to the configuration dictionary
         for item in splines_dict:
             name = item["name"]
@@ -182,6 +189,36 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
     # isRHC branch
     isRHC_list = [0 if isFHC else 1] * len(SelectedSample_list)
 
+
+    if not is_data:
+        # Normalize poly_shape splines per SelectedSample so each dial x has mean weight 1.0.
+        for spline_name, spline_list in Splines_lists.items():
+            if spline_types.get(spline_name) != "poly_shape":
+                continue
+            meta = spline_graph_meta.get(spline_name, {})
+            npts = meta.get("npts", 0)
+            if npts <= 0 or len(spline_list) == 0:
+                continue
+            sample_to_indices = {}
+            for idx, sample in enumerate(SelectedSample_list):
+                if sample < 0:
+                    continue
+                sample_to_indices.setdefault(sample, []).append(idx)
+            for sample, indices in sample_to_indices.items():
+                sums = np.zeros(npts, dtype=float)
+                counts = np.zeros(npts, dtype=float)
+                for idx in indices:
+                    g = spline_list[idx]
+                    for j in range(npts):
+                        sums[j] += g.GetY()[j]
+                        counts[j] += 1.0
+                means = np.divide(sums, counts, out=np.ones_like(sums), where=counts > 0)
+                for idx in indices:
+                    g = spline_list[idx]
+                    for j in range(npts):
+                        y = g.GetY()[j]
+                        norm = means[j]
+                        g.SetPoint(j, g.GetX()[j], y / norm if norm != 0 else y)
 
     if not is_data:
         dictionary = {
@@ -389,7 +426,7 @@ if __name__ == "__main__":
 
     print(f"Processing file: {file_path},\nisFHC={isFHC},\nmax_events={max_events},\nPlots will be saved to: {out_dir}")
 
-    POTratio = 0.6 # POT_data / POT_MC
+    POTratio = 1.0 # POT_data / POT_MC
     print (f"Producing MC dataset with {int(max_events/2.)} events.")
     mc = make_dataset_from_nuisance(file_path, isFHC, max_events=int(max_events/2.), splines_dict=splines_dictionary, tree_name=default_tree_name)
     print (f"Producing DATA dataset with {int(max_events/2.*POTratio)} events.")
@@ -451,6 +488,8 @@ if __name__ == "__main__":
         outfile_cov.WriteObject(upper_bounds, "upper_bounds")
 
         print(f"Saved covariance matrix and metadata to {cov_out_file_name}")
+
+
 
 
 

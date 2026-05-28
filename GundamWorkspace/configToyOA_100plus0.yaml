@@ -62,7 +62,7 @@ fitterEngineConfig:
 
       parameterSetListConfig: "./inputs/parameters/configParSet_100plus0.yaml"
       dataSetList:            "./inputs/datasets/configDatasets.yaml"
-      fitSampleSetConfig:     "./inputs/samples/configSamples.yaml"
+      fitSampleSetConfig:     "./inputs/samples/configSamples_reduced.yaml"
       eventTreeWriter:        "./inputs/output/configEventTreeWriter.yaml"
       plotGeneratorConfig:    "./inputs/output/configPlotGenerator.yaml"
 

@@ -23,7 +23,7 @@ class SplineGenerator:
 
         self.spline = None
 
-        if (spline_type == "polynomial"):
+        if (spline_type == "polynomial" or spline_type == "poly_shape"):
             if (power is None or range_width is None or kin_min is None or kin_max is None):
                 raise ValueError("For polynomial spline type, you must provide: power, range_width, kin_min and kin_max.")
             self.spline = polynomial_spline(power, prior, range_width, kin_min, kin_max)
