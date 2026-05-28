@@ -117,7 +117,7 @@ splines:
   - name: "Spline_Emiss"
     prior: 1.0
     sigma: 0.1
-    type: "polynomial"
+    type: "poly_shape"
     power: 3
     graph_points: 5
     kin_variable: "Emiss"
@@ -132,7 +132,7 @@ splines:
   - name: "Spline_pmiss"
     prior: 1.0
     sigma: 0.1
-    type: "polynomial"
+    type: "poly_shape"
     power: 3
     graph_points: 5
     kin_variable: "magnitude_pmiss"
