@@ -1,12 +1,9 @@
-import uproot
-import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 import sys
-from tqdm import tqdm
 from scipy import interpolate
-from utils import *
+from neut_codes import neut_compact   # uproot-free; only label dict needed for plots
 import plot_style
 
 
@@ -109,6 +106,8 @@ def plot_nu_energy(file_path, tree_name="FlatTree_VARS"):
     Plot the neutrino energy distribution from the NUISANCE flat tree.
     """
     print("Plotting neutrino energy distribution...")
+    from utils import NUISANCEFile   # lazy: pulls uproot only when this is used
+    from tqdm import tqdm
 
     f = NUISANCEFile(file_path, tree_name, relevant_keys=None, step=10000)
     num_entries = len(f)
