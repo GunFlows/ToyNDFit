@@ -33,6 +33,8 @@ def main():
     p.add_argument("-t", "--tree", default="sample_sum", help="TTree name (default: sample_sum).")
     p.add_argument("-n", "--n_spline_events", type=int, default=10,
                    help="Number of leading events for the per-event spline weight plots.")
+    p.add_argument("-m", "--max_events", type=int, default=-1,
+                   help="Max events to read for the kinematic plots (-1 = all).")
     args = p.parse_args()
 
     os.makedirs(args.out_dir, exist_ok=True)
@@ -54,7 +56,10 @@ def main():
     spline_xy = {name: [] for name in spline_branches}  # name -> list of (event_idx, x, y)
 
     n_spl = int(args.n_spline_events)
+    max_ev = int(args.max_events)
     for idx, ev in enumerate(tree):
+        if max_ev > 0 and idx >= max_ev:
+            break
         SelectedSample.append(int(getattr(ev, "SelectedSample")))
         Pmu.append(float(getattr(ev, "Pmu")))
         CosThetamu.append(float(getattr(ev, "CosThetamu")))
