@@ -1,5 +1,6 @@
 from utils import *
 import plot_utils
+import plot_style
 import argparse
 from spline_generator import SplineGenerator
 import ROOT
@@ -148,21 +149,8 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
                 if i < 10:
                     x = np.array([Spline_TGraph.GetX()[j] for j in range(Spline_TGraph.GetN())])
                     y = np.array([Spline_TGraph.GetY()[j] for j in range(Spline_TGraph.GetN())])
-                    plt.figure()
-                    tck,u = interpolate.splprep([x, y], s=0, k=3)
-                    unew = np.arange(0, 1.01, 0.01)
-                    out = interpolate.splev(unew, tck)
-                    t_k = 2*(kin_val-kmin)/(kmax-kmin) - 1 # transform kin_val to the [-1, 1] range expected by the spline function
-                    plt.plot(x, y, marker='o', linestyle='None', label=f't(k) = {t_k:.2f}')
-                    plt.plot(out[0], out[1])
-
-                    plt.title(f"Parameter: {name}, Event {i}")
-                    plt.xlabel("x")
-                    plt.ylabel("w")
-                    plt.legend()
-                    plt.grid()
-                    plt.savefig(os.path.join(out_dir, f"spline_{name}_event_{i}.png"))
-                    plt.close()
+                    plot_utils.plot_spline_weight(
+                        x, y, name, os.path.join(out_dir, f"spline_{name}_event_{i}.png"))
 
 
 

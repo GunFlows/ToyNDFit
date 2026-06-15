@@ -5,32 +5,59 @@ import numpy as np
 import os
 import sys
 from tqdm import tqdm
+from scipy import interpolate
 from utils import *
+import plot_style
+
+
+def plot_spline_weight(x, y, name, out_path):
+    """Paper-style plot of a per-event spline weight w(eta) vs the dial eta.
+
+    x : dial values (eta), y : weights w. `name` is the systematic-parameter name
+    (cleaned of '_' and '#' for the legend). No title; ylabel = w(eta).
+    """
+    plot_style.apply_paper_style()
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    fig, ax = plt.subplots(figsize=(7.0, 5.0))
+    try:
+        tck, _u = interpolate.splprep([x, y], s=0, k=3)
+        unew = np.arange(0, 1.01, 0.01)
+        out = interpolate.splev(unew, tck)
+        ax.plot(out[0], out[1])
+    except Exception:
+        pass
+    ax.plot(x, y, marker="o", linestyle="None", label=plot_style.clean_name(name))
+    ax.set_xlabel(r"$\eta$")
+    ax.set_ylabel(r"$w(\eta)$")
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+    plot_style.ax_fontsize(ax)
+    fig.savefig(out_path)
+    plt.close(fig)
 
 def plot_samples(SelectedSample_list, Pmu_list, CosThetamu_list, Reaction_list, out_dir="./"):
     """
     Plot the kinematic distributions for each sample in SelectedSample_list.
+    Uniform paper style (plot_style.apply_paper_style): no titles, serif fonts.
     """
     print("Plotting kinematic distributions...")
-
+    plot_style.apply_paper_style()
     os.makedirs(out_dir, exist_ok=True)
+
     unique, counts = np.unique(SelectedSample_list, return_counts=True)
-    plt.bar(unique, counts)
-    plt.xlabel('SelectedSample Code')
-    plt.ylabel('Number of Events')
-    plt.title('Distribution of SelectedSample Codes')
-    plt.xticks(unique)
-    plt.savefig(f'{out_dir}/SelectedSample_distribution.png')
-    plt.clf()
+    fig, ax = plt.subplots(figsize=(7.0, 5.0))
+    ax.bar(unique, counts)
+    ax.set_xlabel("Selected sample")
+    ax.set_ylabel("Events")
+    ax.set_xticks(unique)
+    plot_style.ax_fontsize(ax)
+    fig.savefig(f"{out_dir}/SelectedSample_distribution.png")
+    plt.close(fig)
 
     for sample_code in unique:
         indices = [i for i, x in enumerate(SelectedSample_list) if x == sample_code]
-        Pmu_sample = [Pmu_list[i] for i in indices if Pmu_list[i] is not None]
-        CosThetamu_sample = [CosThetamu_list[i] for i in indices if CosThetamu_list[i] is not None]
-        # stack histograms for different Reaction_list within the sample_code
-        reaction_vals = [Reaction_list[i] for i in indices]
-
-        # Group Pmu by reaction for this sample
+        # Group by reaction for this sample
         reaction_vals = [Reaction_list[i] for i in indices]
         Pmu_vals = [Pmu_list[i] for i in indices]
         CosThetamu_vals = [CosThetamu_list[i] for i in indices]
@@ -42,20 +69,19 @@ def plot_samples(SelectedSample_list, Pmu_list, CosThetamu_list, Reaction_list, 
             pmus_for_r = [p for p, rv in zip(Pmu_vals, reaction_vals) if rv == r and p is not None]
             if len(pmus_for_r) > 0:
                 stacked_data.append(pmus_for_r)
-                reaction_dict = neut_group(r)
                 labels.append(f"{neut_compact[r]}")
 
         if len(stacked_data) == 0:
-            # nothing to plot for this sample
             continue
 
-        plt.hist(stacked_data, bins=50, stacked=True, alpha=0.8, label=labels)
-        plt.xlabel('Pmu (GeV/c)')
-        plt.ylabel('Number of Events')
-        plt.title(f'{SampleCodes[sample_code]} ({sum(len(d) for d in stacked_data)} events)')
-        plt.legend(title='Reactions', fontsize='small')
-        plt.savefig(f'{out_dir}/Pmu_distribution_sample_{sample_code}.png')
-        plt.clf()
+        fig, ax = plt.subplots(figsize=(7.0, 5.0))
+        ax.hist(stacked_data, bins=50, stacked=True, alpha=0.8, label=labels)
+        ax.set_xlabel(r"$p_\mu$ [GeV/$c$]")
+        ax.set_ylabel("Events")
+        ax.legend(fontsize="small")
+        plot_style.ax_fontsize(ax)
+        fig.savefig(f"{out_dir}/Pmu_distribution_sample_{sample_code}.png")
+        plt.close(fig)
 
         stacked_data_ctheta = []
         labels_ctheta = []
@@ -63,20 +89,19 @@ def plot_samples(SelectedSample_list, Pmu_list, CosThetamu_list, Reaction_list, 
             cthetas_for_r = [ct for ct, rv in zip(CosThetamu_vals, reaction_vals) if rv == r and ct is not None]
             if len(cthetas_for_r) > 0:
                 stacked_data_ctheta.append(cthetas_for_r)
-                reaction_dict = neut_group(r)
                 labels_ctheta.append(f"{neut_compact[r]}")
 
         if len(stacked_data_ctheta) == 0:
-            # nothing to plot for this sample
             continue
 
-        plt.hist(stacked_data_ctheta, bins=50, stacked=True, alpha=0.8, label=labels_ctheta, range=(-1, 1))
-        plt.xlabel('CosThetamu')
-        plt.ylabel('Number of Events')
-        plt.title(f'{SampleCodes[sample_code]} ({sum(len(d) for d in stacked_data_ctheta)} events)')
-        plt.legend(title='Reactions', fontsize='small')
-        plt.savefig(f'{out_dir}/CosThetamu_distribution_sample_{sample_code}.png')
-        plt.clf()
+        fig, ax = plt.subplots(figsize=(7.0, 5.0))
+        ax.hist(stacked_data_ctheta, bins=50, stacked=True, alpha=0.8, label=labels_ctheta, range=(-1, 1))
+        ax.set_xlabel(r"$\cos\theta_\mu$")
+        ax.set_ylabel("Events")
+        ax.legend(fontsize="small")
+        plot_style.ax_fontsize(ax)
+        fig.savefig(f"{out_dir}/CosThetamu_distribution_sample_{sample_code}.png")
+        plt.close(fig)
 
 
 def plot_nu_energy(file_path, tree_name="FlatTree_VARS"):
