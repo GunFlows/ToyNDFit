@@ -20,6 +20,20 @@ from scipy import interpolate
 
 
 
+def dial_value(event, item):
+    """Kinematic value of a dial for an event. A dial with `modes` (NEUT codes, negative for antineutrinos) acts only on events of
+    those modes, through its `source` NUISANCEEvent variable: NaN elsewhere, or where the variable holds a placeholder (< -900,
+    e.g. the Adler angle outside resonant events), which gives the event no dial (weight 1, SplineGenerator.empty_graph)."""
+    var = item.get("source", item["kin_variable"])
+    val = getattr(event, var, None)
+    val = val() if callable(val) else val
+    if "modes" not in item:
+        return val
+    if event.Mode not in item["modes"] or val is None or val < -900:
+        return float("nan")
+    return float(val)
+
+
 def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_name="FlatTree_VARS", splines_dict = None, is_data = False):
     """
     Read a NUISANCE flat tree and return a list of NUISANCEEvent objects.
@@ -138,7 +152,7 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
 
                 Spline_obj = Spline_objects[name]
 
-                kin_val = getattr(event, kin_var)() if callable(getattr(event, kin_var, None)) else getattr(event, kin_var)
+                kin_val = dial_value(event, item)
                 if kin_val is None:
                     raise ValueError(f"Kinematic variable {kin_var} not found in NUISANCEEvent.")
                 # print(f"Generating graph: {name} using {kin_var} = {kin_val}. Npts={npts}, range=({range_min}, {range_max}), prior={prior}")
@@ -197,12 +211,16 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
                 counts = np.zeros(npts, dtype=float)
                 for idx in indices:
                     g = spline_list[idx]
+                    if g.GetN() != npts:   # no dial on this event (mode-restricted): not part of the mean
+                        continue
                     for j in range(npts):
                         sums[j] += g.GetY()[j]
                         counts[j] += 1.0
                 means = np.divide(sums, counts, out=np.ones_like(sums), where=counts > 0)
                 for idx in indices:
                     g = spline_list[idx]
+                    if g.GetN() != npts:
+                        continue
                     for j in range(npts):
                         y = g.GetY()[j]
                         norm = means[j]
@@ -304,7 +322,7 @@ def write_dictionary_to_tree(dictionary, output_root_file):
             g = dictionary[key][i]
             # placement new into TClonesArray
             ROOT.TClonesArray(tca).ConstructedAt(0)
-            tca[0] = g  # PyROOT magic works here
+            tca.ConstructedAt(0).__assign__(g)  # ROOT >= 6.32 refuses tca[0] = g
 
         tree.Fill()
         # progress bar
@@ -379,7 +397,7 @@ if __name__ == "__main__":
         # get the first entry of the NUISANCEFile to check if the kin_variable exists
         f = NUISANCEFile(file_path, default_tree_name, relevant_keys=None, step=10000)
         event_test = next(iter(f))
-        kin_val = getattr(event_test, kin_var)() if callable(getattr(event_test, kin_var, None)) else getattr(event_test, kin_var, None)
+        kin_val = dial_value(event_test, item)
         if kin_val is None:
             raise ValueError(f"Kinematic variable {kin_var} not found in NUISANCEEvent.")
 

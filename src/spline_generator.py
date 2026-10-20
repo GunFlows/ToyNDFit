@@ -54,6 +54,8 @@ class SplineGenerator:
         ROOT.TGraph
             The generated TGraph, to be used as a spline.
         """
+        if isinstance(kin_val, float) and np.isnan(kin_val):   # the dial does not act on this event (see dial_value)
+            return self.empty_graph()
         x_vals = np.linspace(range_min, range_max, n_points)
         y_vals = [self.spline.evaluate(x, kin_val) for x in x_vals]
 

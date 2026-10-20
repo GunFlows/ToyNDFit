@@ -73,6 +73,8 @@ def build_posdef_matrix(diagonal, filter_sigma=.9, scale = 0.5, blobs=6, seed=42
     L = np.tril(L)
     # compute covariance matrix. This is positive definite and symmetric by definition
     M = L @ L.T
+    # to avoid the nose to sum up
+    d = np.sqrt(np.diag(M)); M = M * np.outer(diagonal / d, diagonal / d)
 
     # check that M is positive definite
     eigvals = np.linalg.eigvalsh(M)
