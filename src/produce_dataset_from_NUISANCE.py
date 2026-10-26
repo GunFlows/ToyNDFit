@@ -102,6 +102,8 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         for item in splines_dict:
             name = item["name"]
             kind = item["type"]
+            if kind in ("physics", "detector"):   # weights computed from the whole event (src/physics_dials.py, src/detector_dials.py), below
+                continue
             power = item["power"]
             prior = item["prior"]
             kin_var = item["kin_variable"]
@@ -112,6 +114,19 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
 
             Spline_objects[name] = SplineGenerator(spline_type=kind, prior=prior, power=power, range_width=imp, kin_min=kmin, kin_max=kmax, mirror_point=mirror_point)
 
+
+    physics = {}
+    phys_items = [item for item in splines_dict if item["type"] == "physics"] if not is_data else []
+    if phys_items:
+        import physics_dials
+        ev = physics_dials.Events(physics_dials.load(file_path, int(max_events) + 1))
+        for item in phys_items:
+            physics[item["name"]] = physics_dials.compute(ev, item)
+            print(f"physics dial {item['name']}: {physics[item['name']][2].sum()} events with a response", flush=True)
+        del ev
+    det_items = [item for item in splines_dict if item["type"] == "detector"] if not is_data else []
+    if det_items:
+        import detector_dials
 
     pbar = tqdm(total=max_events)
     for i, event in enumerate(f):
@@ -140,8 +155,21 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
             pion_energy = event.total_pion_energy() if isPP else 0.0
 
             # generate splines graphs
+            res = detector_dials.resolutions(Pmu, CosThetamu, pmu_map, cthetamap) if det_items and Pmu is not None else None
             for item in splines_dict:
                 name = item["name"]
+                if item["type"] == "detector":
+                    w = detector_dials.weights(item, Pmu, CosThetamu, Pmu_smeared, CosThetamu_smeared, *res) if res else None
+                    physics[name] = (item["knots"], {i: w}, {i: w is not None})
+                if name in physics:
+                    knots, weights, acts = physics[name]
+                    if acts[i]:
+                        Spline_TGraph = ROOT.TGraph(len(knots), array("d", knots), array("d", weights[i]))
+                        Spline_TGraph.SetName(f"spline_{name}")
+                    else:
+                        Spline_TGraph = ROOT.TGraph(1); Spline_TGraph.SetPoint(0, 1, 1); Spline_TGraph.SetTitle("No Spline")
+                    Splines_lists[name].append(Spline_TGraph)
+                    continue
                 kin_var = item["kin_variable"]
                 npts = item.get("graph_points", 10)
                 kmin = item.get("kin_min", 0.5)

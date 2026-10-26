@@ -1,0 +1,959 @@
+# ToyNDFit dev/extendedLLH: his 10 dials (config_splines_100p10.yaml) plus the physics dials of config_physics_dials.yaml
+# (written by GuNFlows studies/scale/production/build_phys61.py; edit the two sources, not this file).
+generate_cov_matrix: true
+cov_file_path: ${NDFITMOCKUP_GUNDAM_WS}/inputs/parameters/splines/spl10_with_names.root
+filter_sigma: 0.0
+blobs: 2
+seed: 42
+scale_correlation: 0.1
+splines:
+- name: Spline_Enu
+  prior: 1.0
+  sigma: 0.1
+  type: polynomial
+  power: 3
+  graph_points: 5
+  kin_variable: Enu_true
+  kin_min: 0.0
+  kin_max: 5.0
+  importance: 0.1
+  range_min: 0.7
+  range_max: 1.3
+  lower_bound: -999.0
+  upper_bound: 999.0
+- name: Spline_PP
+  prior: 1.0
+  sigma: 0.1
+  type: polynomial
+  power: 3
+  graph_points: 5
+  kin_variable: total_pion_energy
+  kin_min: 0.0
+  kin_max: 1.0
+  importance: 0.1
+  range_min: 0.7
+  range_max: 1.3
+  lower_bound: -999.0
+  upper_bound: 999.0
+- name: Spline_FSIstrength
+  prior: 1.0
+  sigma: 0.1
+  type: polynomial
+  power: 3
+  graph_points: 5
+  kin_variable: FSI_strength
+  kin_min: -0.2
+  kin_max: 0.2
+  importance: 0.1
+  range_min: 0.7
+  range_max: 1.3
+  lower_bound: -999.0
+  upper_bound: 999.0
+- name: Spline_mirror_q0
+  prior: 1.0
+  sigma: 0.1
+  type: polynomial
+  power: 1
+  graph_points: 20
+  kin_variable: q0
+  kin_min: 0.0
+  kin_max: 0.5
+  importance: 0.05
+  range_min: 0.7
+  range_max: 1.3
+  lower_bound: -999.0
+  upper_bound: 999.0
+  mirror_point: 1.05
+- name: Spline_mirror_q3
+  prior: 1.0
+  sigma: 0.1
+  type: polynomial
+  power: 3
+  graph_points: 20
+  kin_variable: q3
+  kin_min: 0.0
+  kin_max: 0.5
+  importance: 0.1
+  range_min: 0.7
+  range_max: 1.3
+  lower_bound: -999.0
+  upper_bound: 999.0
+  mirror_point: 0.9
+- name: Spline_bound_W
+  prior: 1.0
+  sigma: 0.1
+  type: polynomial
+  power: 1
+  graph_points: 5
+  kin_variable: W
+  kin_min: 0.0
+  kin_max: 1.5
+  importance: 0.1
+  range_min: 0.7
+  range_max: 1.3
+  lower_bound: -999.0
+  upper_bound: 999.0
+- name: Spline_Emiss
+  prior: 1.0
+  sigma: 0.1
+  type: poly_shape
+  power: 3
+  graph_points: 5
+  kin_variable: Emiss
+  kin_min: 0.0
+  kin_max: 0.15
+  importance: 0.1
+  range_min: 0.7
+  range_max: 1.3
+  lower_bound: -999.0
+  upper_bound: 999.0
+- name: Spline_pmiss
+  prior: 1.0
+  sigma: 0.1
+  type: poly_shape
+  power: 3
+  graph_points: 5
+  kin_variable: magnitude_pmiss
+  kin_min: 0.0
+  kin_max: 600
+  importance: 0.1
+  range_min: 0.7
+  range_max: 1.3
+  lower_bound: -999.0
+  upper_bound: 999.0
+- name: Spline_Q2
+  prior: 1.0
+  sigma: 0.1
+  type: polynomial
+  power: 3
+  graph_points: 10
+  kin_variable: Q2
+  kin_min: 0.0
+  kin_max: 0.25
+  importance: 0.1
+  range_min: 0.7
+  range_max: 1.3
+  lower_bound: -999.0
+  upper_bound: 999.0
+- name: Spline_PB_nuantinu
+  prior: 1.0
+  sigma: 0.1
+  type: polynomial
+  power: 3
+  graph_points: 10
+  kin_variable: PNucleon_nuantinu
+  kin_min: -2.0
+  kin_max: 2.0
+  importance: 0.1
+  range_min: 0.7
+  range_max: 1.3
+  lower_bound: -999.0
+  upper_bound: 999.0
+- name: MA_QE
+  type: physics
+  response: ma_qe
+  knots:
+  - 0.91
+  - 0.97
+  - 1.03
+  - 1.09
+  - 1.15
+  - 1.21
+  - 1.27
+  - 1.33
+  - 1.39
+  - 1.45
+  - 1.51
+  prior: 1.21
+  sigma: 0.06
+  lower_bound: 0.91
+  upper_bound: 1.51
+  reference: '[LS] tensor contraction at the event''s nucleon momenta; width [C][G]'
+- name: QE_vector_FF
+  type: physics
+  response: vector_ff
+  knots:
+  - 0
+  - 0.5
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  lower_bound: 0
+  upper_bound: 1
+  reference: 0 = BBBA05 [BBBA], 1 = dipole
+- name: QE_Q2_0
+  type: physics
+  response: q2_norm
+  q2_range:
+  - 0.0
+  - 0.05
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[C] CCQE Q2 normalisation, free'
+- name: QE_Q2_1
+  type: physics
+  response: q2_norm
+  q2_range:
+  - 0.05
+  - 0.1
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[C]'
+- name: QE_Q2_2
+  type: physics
+  response: q2_norm
+  q2_range:
+  - 0.1
+  - 0.15
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[C]'
+- name: QE_Q2_3
+  type: physics
+  response: q2_norm
+  q2_range:
+  - 0.15
+  - 0.2
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[C]'
+- name: QE_Q2_4
+  type: physics
+  response: q2_norm
+  q2_range:
+  - 0.2
+  - 0.25
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[C]'
+- name: QE_Q2_5
+  type: physics
+  response: q2_norm
+  q2_range:
+  - 0.25
+  - 0.5
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 0.11
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[C][G]'
+- name: QE_Q2_6
+  type: physics
+  response: q2_norm
+  q2_range:
+  - 0.5
+  - 1.0
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 0.18
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[C][G]'
+- name: QE_Q2_7
+  type: physics
+  response: q2_norm
+  q2_range:
+  - 1.0
+  - 1000000000.0
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 0.4
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[C][G]'
+- name: PB_C_nu
+  type: physics
+  response: pauli_blocking
+  antinu: false
+  dial_type: Graph
+  knots:
+  - 0
+  - 0.02
+  - 0.04
+  - 0.06
+  - 0.08
+  - 0.1
+  - 0.12
+  - 0.14
+  - 0.16
+  - 0.18
+  - 0.2
+  - 0.22
+  - 0.24
+  prior: 0.0
+  sigma: 0.03
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 0.24
+  reference: 'global Fermi surface cut on the pre-FSI nucleon momentum (GeV/c) on top of the local Fermi gas: [G] definition, GENIE FGM k_F dial [GENIE]'
+- name: PB_C_nubar
+  type: physics
+  response: pauli_blocking
+  antinu: true
+  dial_type: Graph
+  knots:
+  - 0
+  - 0.02
+  - 0.04
+  - 0.06
+  - 0.08
+  - 0.1
+  - 0.12
+  - 0.14
+  - 0.16
+  - 0.18
+  - 0.2
+  - 0.22
+  - 0.24
+  prior: 0.0
+  sigma: 0.03
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 0.24
+  reference: '[G] [GENIE]'
+- name: CC_norm_lowE
+  type: physics
+  response: cc_norm_lowE
+  knots:
+  - -3
+  - -2
+  - -1
+  - 0
+  - 1
+  - 2
+  - 3
+  prior: 0.0
+  sigma: 1.0
+  lower_bound: -3
+  upper_bound: 3
+  reference: '[G] CC norm nu (2 %) / nubar (1 %), 0.3-0.6 GeV, 100 % anti-correlated: one dial'
+- name: Nucleon_FSI
+  type: physics
+  response: nucleon_fsi
+  which: total
+  knots:
+  - -0.8
+  - -0.6
+  - -0.4
+  - -0.2
+  - 0
+  - 0.2
+  - 0.4
+  - 0.6
+  - 0.8
+  prior: 0.0
+  sigma: 0.3
+  lower_bound: -0.8
+  upper_bound: 0.8
+  reference: '[G] nucleon FSI, inclusive fixed'
+- name: QE_MINERvA_lowrecoil
+  type: physics
+  response: minerva_qe
+  knots:
+  - 0
+  - 0.5
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[M18] QE Gaussian in (q0, q3)'
+- name: MEC_norm_nu
+  type: physics
+  response: mec_norm
+  antinu: false
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[C][G]'
+- name: MEC_norm_nubar
+  type: physics
+  response: mec_norm
+  antinu: true
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[C][G]'
+- name: MEC_pair_ratio_nu
+  type: physics
+  response: mec_pair_ratio
+  antinu: false
+  knots:
+  - -1.5
+  - -1
+  - -0.5
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  prior: 0.0
+  sigma: 1.0
+  lower_bound: -1.5
+  upper_bound: 2
+  reference: '[G] PNNN, nu: np (vs nn) share 70 % -> 80 % at x = 1'
+- name: MEC_pair_ratio_nubar
+  type: physics
+  response: mec_pair_ratio
+  antinu: true
+  knots:
+  - -1.5
+  - -1
+  - -0.5
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  prior: 0.0
+  sigma: 1.0
+  lower_bound: -1.5
+  upper_bound: 2
+  reference: '[G] PNNN, nubar: np (vs pp) share 70 % -> 80 % at x = 1'
+- name: MEC_MINERvA_np
+  type: physics
+  response: minerva_2p2h
+  pair: np
+  knots:
+  - 0
+  - 0.5
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[M18] np-only Gaussian'
+- name: MEC_MINERvA_nn
+  type: physics
+  response: minerva_2p2h
+  pair: nn
+  knots:
+  - 0
+  - 0.5
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[M18] nn+pp-only Gaussian'
+- name: MA_RES
+  type: physics
+  response: ma_res
+  knots:
+  - 0.65
+  - 0.71
+  - 0.77
+  - 0.83
+  - 0.89
+  - 0.95
+  - 1.01
+  - 1.07
+  - 1.13
+  - 1.19
+  - 1.25
+  prior: 0.95
+  sigma: 0.1
+  lower_bound: 0.65
+  upper_bound: 1.25
+  reference: '[LP] V/A decomposition, dipole C5A; width [G]'
+- name: CA5_RES
+  type: physics
+  response: ca5
+  knots:
+  - 0.71
+  - 0.77
+  - 0.83
+  - 0.89
+  - 0.95
+  - 1.01
+  - 1.07
+  - 1.13
+  - 1.19
+  - 1.25
+  - 1.31
+  prior: 1.01
+  sigma: 0.1
+  lower_bound: 0.71
+  upper_bound: 1.31
+  reference: '[LP]; width and correlation -0.11 with MA_RES [G]'
+- name: RES_Delta_decay
+  type: physics
+  response: delta_decay
+  knots:
+  - 0
+  - 0.5
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[RS] Eq. 2.46 vs isotropic, [G]'
+- name: CC1pi0_norm_nu
+  type: physics
+  response: mode_norm
+  modes:
+  - 12
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 0.3
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[G]'
+- name: CC1pi0_norm_nubar
+  type: physics
+  response: mode_norm
+  modes:
+  - -12
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 0.3
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[G]'
+- name: RES_lowQ2_nu_1pic
+  type: physics
+  response: lowq2_pion
+  channel: nu_1pic
+  knots:
+  - 0
+  - 0.5
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[M19] Eqs. 6-7, Table IX: nu CC1pi+-, R1 = 0.53, R2 = 0.50'
+- name: RES_lowQ2_nu_Npic
+  type: physics
+  response: lowq2_pion
+  channel: nu_Npic
+  knots:
+  - 0
+  - 0.5
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[M19] Eqs. 6-7, Table IX: nu CCNpi+-, R1 = 0.43, R2 = 0.50'
+- name: RES_lowQ2_nu_1pi0
+  type: physics
+  response: lowq2_pion
+  channel: nu_1pi0
+  knots:
+  - 0
+  - 0.5
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[M19] Eqs. 6-7, Table IX: nu CC1pi0, R1 = 0.21, R2 = 0.63'
+- name: RES_lowQ2_nubar
+  type: physics
+  response: lowq2_pion
+  channel: nubar_1pi0
+  knots:
+  - 0
+  - 0.5
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[M19] Eqs. 6-7, Table IX: nubar CC1pi0, R1 = 0.14, R2 = 1.00, applied to every resonant nubar event'
+- name: CC_coh_norm
+  type: physics
+  response: mode_norm
+  modes:
+  - 16
+  - -16
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 0.3
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[G]'
+- name: CC_coh_lowE
+  type: physics
+  response: coh_lowE
+  knots:
+  - 0
+  - 0.5
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  prior_type: flat
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[M16][M18] T_pi < 0.45 GeV halved'
+- name: CC_misc_norm
+  type: physics
+  response: mode_norm
+  modes:
+  - 15
+  - 17
+  - 22
+  - 23
+  - -15
+  - -17
+  - -22
+  - -23
+  knots:
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  - 3
+  prior: 1.0
+  sigma: 1.0
+  lower_bound: 0
+  upper_bound: 3
+  reference: '[G]'
+- name: CC_DIS_MPi_norm_nu
+  type: physics
+  response: mode_norm
+  modes:
+  - 21
+  - 26
+  knots:
+  - 0.7
+  - 0.8
+  - 0.9
+  - 1.0
+  - 1.1
+  - 1.2
+  - 1.3
+  prior: 1.0
+  sigma: 0.035
+  lower_bound: 0.7
+  upper_bound: 1.3
+  reference: '[G]'
+- name: CC_DIS_MPi_norm_nubar
+  type: physics
+  response: mode_norm
+  modes:
+  - -21
+  - -26
+  knots:
+  - 0.7
+  - 0.8
+  - 0.9
+  - 1.0
+  - 1.1
+  - 1.2
+  - 1.3
+  prior: 1.0
+  sigma: 0.065
+  lower_bound: 0.7
+  upper_bound: 1.3
+  reference: '[G]'
+- name: BY_DIS
+  type: physics
+  response: bodek_yang
+  modes:
+  - 26
+  knots:
+  - 0
+  - 0.25
+  - 0.5
+  - 0.75
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[C] 0 = BY on (BY05), 1 = off, W > 2 GeV; range = the interpolation between the two'
+- name: BY_MPi_vector
+  type: physics
+  response: bodek_yang_part
+  part: vector
+  modes:
+  - 21
+  knots:
+  - 0
+  - 0.25
+  - 0.5
+  - 0.75
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[G] vector part of the BY correction for multi-pi, 0 = on, 1 = off; axial K factors arXiv:2108.09240'
+- name: BY_MPi_axial
+  type: physics
+  response: bodek_yang_part
+  part: axial
+  modes:
+  - 21
+  knots:
+  - 0
+  - 0.25
+  - 0.5
+  - 0.75
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[G] axial part of the BY correction for multi-pi, 0 = on, 1 = off; axial K factors arXiv:2108.09240'
+- name: DIS_R_long
+  type: physics
+  response: r_long
+  modes:
+  - 21
+  - 26
+  knots:
+  - -2
+  - -1
+  - 0
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  lower_bound: -2
+  upper_bound: 1
+  reference: R = sigma_L/sigma_T +- 0.05 per unit (arXiv:1011.6592)
+- name: MPi_multiplicity
+  type: physics
+  response: multiplicity
+  knots:
+  - 0
+  - 0.25
+  - 0.5
+  - 0.75
+  - 1
+  prior: 0.0
+  sigma: 1.0
+  lower_bound: 0
+  upper_bound: 1
+  reference: '[G] 0 = NEUT, 1 = AGKY [AGKY]; range = the interpolation between the two'
+- name: PiFSI_QE_low
+  type: physics
+  response: pion_fsi
+  which: QE_low
+  knots:
+  - -0.9
+  - -0.6
+  - -0.3
+  - 0
+  - 0.3
+  - 0.6
+  - 0.9
+  - 1.2
+  prior: 0.0
+  sigma: 0.29
+  lower_bound: -0.9
+  upper_bound: 1.2
+  reference: '[C][GENIE]'
+- name: PiFSI_QE_high
+  type: physics
+  response: pion_fsi
+  which: QE_high
+  knots:
+  - -0.9
+  - -0.5
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  prior: 0.0
+  sigma: 0.47
+  lower_bound: -0.9
+  upper_bound: 2
+  reference: '[C][GENIE]'
+- name: PiFSI_CEX_low
+  type: physics
+  response: pion_fsi
+  which: CEX_low
+  knots:
+  - -0.9
+  - -0.5
+  - 0
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  prior: 0.0
+  sigma: 0.44
+  lower_bound: -0.9
+  upper_bound: 2
+  reference: '[C][GENIE]'
+- name: PiFSI_CEX_high
+  type: physics
+  response: pion_fsi
+  which: CEX_high
+  knots:
+  - -0.6
+  - -0.4
+  - -0.2
+  - 0
+  - 0.2
+  - 0.4
+  - 0.6
+  prior: 0.0
+  sigma: 0.16
+  lower_bound: -0.6
+  upper_bound: 0.6
+  reference: '[G] 0.288 / 1.8'
+- name: PiFSI_ABS
+  type: physics
+  response: pion_fsi
+  which: ABS
+  knots:
+  - -0.9
+  - -0.6
+  - -0.3
+  - 0
+  - 0.3
+  - 0.6
+  - 0.9
+  prior: 0.0
+  sigma: 0.31
+  lower_bound: -0.9
+  upper_bound: 0.9
+  reference: '[C][GENIE]'
+- name: PiFSI_PROD
+  type: physics
+  response: pion_fsi
+  which: PROD
+  knots:
+  - -0.9
+  - 0
+  - 1
+  - 2
+  - 3
+  prior: 0.0
+  sigma: 1.1
+  lower_bound: -0.9
+  upper_bound: 3
+  reference: '[C][GENIE]'

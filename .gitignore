@@ -4,3 +4,7 @@ outputs/
 mcmc_analysis/results/
 GundamWorkspace/datasets*
 GundamWorkspace/output
+
+# Python bytecode
+__pycache__/
+*.pyc
