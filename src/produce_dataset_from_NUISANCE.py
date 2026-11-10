@@ -102,7 +102,7 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
         for item in splines_dict:
             name = item["name"]
             kind = item["type"]
-            if kind in ("physics", "detector"):   # weights computed from the whole event (src/physics_dials.py, src/detector_dials.py), below
+            if kind in ("physics", "detector", "stress"):   # weights computed from the whole event (src/physics_dials.py, src/detector_dials.py, src/stress_dials.py), below
                 continue
             power = item["power"]
             prior = item["prior"]
@@ -127,6 +127,18 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
     det_items = [item for item in splines_dict if item["type"] == "detector"] if not is_data else []
     if det_items:
         import detector_dials
+    # stress-test dials: per-event graphs in the MC; in the data, the weight of each event with every dial at its truth
+    stress_items = [item for item in (splines_dict or []) if item["type"] == "stress"]
+    truth_weight = None
+    if stress_items:
+        import stress_dials
+        if not is_data:
+            ev = stress_dials.load(file_path, 0, int(max_events) + 1)
+            for item in stress_items:
+                physics[item["name"]] = stress_dials.compute(ev, item)
+                print(f"stress dial {item['name']}: {physics[item['name']][2].sum()} events with a response", flush=True)
+        else:
+            truth_weight = stress_dials.truth_weights(stress_dials.load(file_path, int(np.ceil(num_entries - max_events)), num_entries), stress_items)
 
     pbar = tqdm(total=max_events)
     for i, event in enumerate(f):
@@ -286,6 +298,9 @@ def make_dataset_from_nuisance(file_path, isFHC = True, max_events = -1, tree_na
             "CosThetamu": to_1d_numpy(CosThetamu_list, dtype=np.float32, float_fill=-999.0),
             "isRHC": to_1d_numpy(isRHC_list, dtype=np.int32, int_fill=0),
         }
+        if truth_weight is not None:
+            assert len(truth_weight) == len(SelectedSample_list), "stress-test dial entries differ from the data events"
+            dictionary["weight"] = truth_weight.astype(np.float32)
 
 
 
@@ -411,6 +426,9 @@ if __name__ == "__main__":
         prior = item["prior"]
         sigma = item["sigma"]
         sigmas.append(sigma) # actually not variances, but sigmas
+        if item["type"] in ("physics", "detector", "stress"):   # weights from the whole event: no kinematic variable to check
+            print(f"{name}\n  prior        = {prior}\n  sigma        = {sigma}\n  type         = {item['type']} ({item['response']})\n")
+            continue
         importance = item["importance"]
         kind = item["type"]
         power = item["power"]
@@ -464,7 +482,7 @@ if __name__ == "__main__":
     print (f"Producing MC dataset with {int(max_events/2.)} events.")
     mc = make_dataset_from_nuisance(file_path, isFHC, max_events=int(max_events/2.), splines_dict=splines_dictionary, tree_name=default_tree_name)
     print (f"Producing DATA dataset with {int(max_events/2.*POTratio)} events.")
-    data = make_dataset_from_nuisance(file_path, isFHC, is_data= True, max_events=int(max_events/2.*POTratio), tree_name=default_tree_name)
+    data = make_dataset_from_nuisance(file_path, isFHC, is_data= True, max_events=int(max_events/2.*POTratio), splines_dict=splines_dictionary, tree_name=default_tree_name)
 
     # create plots (unpack lists from dictionary)
     SelectedSample_list = mc["SelectedSample"]

@@ -43,7 +43,7 @@ class NUISANCEEvent:
         if len(Px) > 1:
             # Take leading muon if multiple muons found
             max_index = np.argmax(np.sqrt(Px**2 + Py**2 + Pz**2))
-            return np.sqrt(Px[max_index]**2 + Py[max_index]**2 + Pz[max_index]**2)
+            return 1000 * np.sqrt(Px[max_index]**2 + Py[max_index]**2 + Pz[max_index]**2)
 
         return 1000 * np.sqrt(Px[0]**2 + Py[0]**2 + Pz[0]**2) # MeV/c!!!
 
@@ -121,7 +121,7 @@ class NUISANCEEvent:
         """Return the FSI strength of the event computed as energy of the escaping proton - energy of the proton at vertex."""
 
         pdg_vert = np.array(self.pdg_vert)
-        proton_mask = (pdg_vert == 2212)
+        proton_mask = (pdg_vert == 2212) & (np.arange(len(pdg_vert)) >= self.ninitp)
         pdg_out = np.array(self.pdg)
         proton_mask_out = (pdg_out == 2212)
         # print(f"N protons at vertex: {np.sum(proton_mask)}, N protons out: {np.sum(proton_mask_out)}")
@@ -195,7 +195,7 @@ class NUISANCEEvent:
         if has_muon:
             muon_pmu = self.Pmu()
             muon_costhetamu = self.CosThetamu()
-            has_muon = has_muon and (muon_pmu > self.pmu_threshold) and (muon_costhetamu > self.costhetamu_threshold)
+            has_muon = has_muon and (muon_pmu > 1000 * self.pmu_threshold) and (muon_costhetamu > self.costhetamu_threshold)
 
         num_piplus = 0
         piplus_mask = (pdg == 211)
@@ -230,7 +230,7 @@ class NUISANCEEvent:
         if has_muon:
             muon_pmu = self.Pmu()
             muon_costhetamu = self.CosThetamu()
-            has_muon = has_muon and (muon_pmu > self.pmu_threshold) and (muon_costhetamu > self.costhetamu_threshold)
+            has_muon = has_muon and (muon_pmu > 1000 * self.pmu_threshold) and (muon_costhetamu > self.costhetamu_threshold)
 
         if has_antimuon:
             antimuon_mask = (pdg == -13)

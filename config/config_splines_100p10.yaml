@@ -137,7 +137,7 @@ splines:
     graph_points: 5
     kin_variable: "magnitude_pmiss"
     kin_min: 0.0
-    kin_max: 600
+    kin_max: 0.6
     importance: 0.1
     range_min: 0.7
     range_max: 1.3
